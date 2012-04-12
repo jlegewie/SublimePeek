@@ -5,9 +5,6 @@
 loc      = '~/Library/Application Support/Sublime Text 2/Packages/SublimePeek-R-help'
 pkg.user = rownames(installed.packages())
 
-# set file location
-file = paste(loc,"R-help.json",sep="")
-
 # function to get html formated help
 # adopted from stackoverflow
 getHTMLhelp = function(...) { 
@@ -45,18 +42,6 @@ pkg.all = pkg.all[!(pkg.all %in% c("survival","tcltk","cem","debug"))]
 
 # load packages
 sapply(pkg.all, library, character.only = TRUE)
-
-# write beginning of file
-#cat('[', file = file)
-
-# define structure of json file
-struc = '
-    {
-        "fn": "%s",
-        "package": "%s",
-        "tooltip": "%s",
-        "help": "%s"
-    }'
 
 # loaded packages
 pkg.loaded=(.packages()) 

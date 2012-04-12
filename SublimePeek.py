@@ -40,6 +40,8 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         # quick look
         if os.path.isfile(filepath):
             args = ['/usr/bin/qlmanage', '-p', filepath]
+            # qlmanage documentation
+            # http://developer.apple.com/library/mac/#documentation/Darwin/Reference/ManPages/man1/qlmanage.1.html
             subprocess.Popen(args)
         else:
             sublime.status_message("SublimePeek: No help file found for '" + keyword + "'.")

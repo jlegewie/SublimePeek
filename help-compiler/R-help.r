@@ -1,4 +1,8 @@
 ## script to get R help files
+# This script generates R help files for all installed packages for SublimePeek 
+# and moves the style file R.css to the correct location.
+# Help files for the base packages and ggplot2 are also available at 
+# https://github.com/jlegewie/SublimePeek-R-help
 
 ## USER PARAMETERS ##
 # set the loc variable to the ST2 Packages Folder (don't forget the / at the end)

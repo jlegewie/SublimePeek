@@ -1,8 +1,9 @@
 ## script to get R help files
 
 ## USER PARAMETERS ##
-loc           = '~/Library/Application Support/Sublime Text 2/Packages/SublimePeek/R-help/'
-pkg.user      = rownames(installed.packages())
+# set the loc variable to [ST2 Packages Folder]/SublimePeek-R-help
+loc      = '~/Library/Application Support/Sublime Text 2/Packages/SublimePeek-R-help'
+pkg.user = rownames(installed.packages())
 
 # set file location
 file = paste(loc,"R-help.json",sep="")

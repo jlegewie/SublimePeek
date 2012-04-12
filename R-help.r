@@ -1,8 +1,8 @@
 ## script to get R help files
 
 ## USER PARAMETERS ##
-# set the loc variable to [ST2 Packages Folder]/SublimePeek-R-help
-loc      = '~/Library/Application Support/Sublime Text 2/Packages/SublimePeek-R-help'
+# set the loc variable to [ST2 Packages Folder]/SublimePeek-R-help (don't forget the / at the end)
+loc      = '~/Library/Application Support/Sublime Text 2/Packages/SublimePeek-R-help/'
 # the default setting uses all installed packages. Alternative: vector of packages
 pkg.user = rownames(installed.packages())
 
@@ -75,7 +75,7 @@ for(pkg in pkg.loaded) {
     cat(" done!\n")
 }
 
-# end of file
+# end of file ggplot
 cat("\n\nHelp files from ",n.f," functions in ", n.p," packages saved to JSON.\n")
 
 

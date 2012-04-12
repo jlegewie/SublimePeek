@@ -18,7 +18,7 @@ getHTMLhelp = function(...) {
         out=""
     }
     # return(htmlspecialchars(out))
-    return(out)
+    return(paste(out,"\n",sep=""))
 }
 
 # deal with special HTML/XML characters

@@ -3,6 +3,7 @@
 ## USER PARAMETERS ##
 # set the loc variable to [ST2 Packages Folder]/SublimePeek-R-help
 loc      = '~/Library/Application Support/Sublime Text 2/Packages/SublimePeek-R-help'
+# the default setting uses all installed packages. Alternative: vector of packages
 pkg.user = rownames(installed.packages())
 
 # function to get html formated help

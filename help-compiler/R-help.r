@@ -1,8 +1,8 @@
 ## script to get R help files
 
 ## USER PARAMETERS ##
-# set the loc variable to [ST2 Packages Folder]/SublimePeek-R-help (don't forget the / at the end)
-loc      = '~/Library/Application Support/Sublime Text 2/Packages/SublimePeek-R-help/'
+# set the loc variable to the ST2 Packages Folder (don't forget the / at the end)
+loc      = '~/Library/Application Support/Sublime Text 2/Packages/'
 # the default setting uses all installed packages. Alternative: vector of packages
 pkg.user = rownames(installed.packages())
 
@@ -69,7 +69,7 @@ for(pkg in pkg.loaded) {
         obj = get(fn, envir = as.environment(env))
         if (mode(obj) == "function") {
             n.f = n.f+1
-            cat(getHTMLhelp(fn),file= paste(loc,fn,".html",sep=""))   
+            cat(getHTMLhelp(fn),file= paste(loc,"SublimePeek-R-help/",fn,".html",sep=""))   
         }
     }
     cat(" done!\n")

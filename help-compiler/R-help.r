@@ -37,6 +37,9 @@ htmlspecialchars <- function(string) {
     string
 }
 
+# create folder for R help files
+dir.create(paste(loc,"SublimePeek-R-help/",sep=""),showWarnings=FALSE)
+
 # get main packages
 pkg.main = names(na.omit(installed.packages()[, 'Priority']))
 

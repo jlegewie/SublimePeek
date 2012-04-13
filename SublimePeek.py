@@ -6,6 +6,7 @@ import sublime_plugin
 import subprocess
 import re
 import os.path
+import json
 
 ## mac os - quicklook
 # /usr/bin/qlmanage -p '/Users/jpl2136/Desktop/anette/Causal Inference NYU/Assigments/4 Matching Scores/psbal.ado'
@@ -13,11 +14,14 @@ import os.path
 ## linux - gloobus-preview
 # /usr/bin/gloobus-preview filelocation
 
+## load settings
+settings = sublime.load_settings(u'SublimePeek.sublime-settings')
+
 
 class SublimePeekCommand(sublime_plugin.TextCommand):
 
     def run(self, edit):
-
+        settings.get("colorcode_formats")
         # get language
         lang = self.get_language()
 
@@ -33,6 +37,13 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         # exit if no keyword defined
         if(keyword == ""):
             return
+
+        # use reference table to get correct help file
+        if settings.get(lang).get("accessor") == "reference-file":
+            refs = json.load(open(path + '/stata-ref.json', "r"))
+            refs_from = [item['from'] for item in refs]
+            i = refs_from.index(keyword)
+            keyword = refs[i]['to']
 
         # set name of help file
         filepath = path + "%s.html" % (keyword)
@@ -57,8 +68,8 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         s = self.view.sel()[0]
         pos = s.b
         if s.empty():
-            # if cursor after (, return help for function before (
-            if self.view.substr(pos - 1) == "(":
+            # if cursor at end of line, before " ", or after (, return help for function before (
+            if self.view.substr(pos) in ["\n", " "] or self.view.substr(pos - 1) == "(":
                 s_str = self.get_word(self.view, pos - 1)
             else:
                 s_str = self.get_word(self.view, pos)

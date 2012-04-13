@@ -1,0 +1,8 @@
+{
+	"R": {
+		"accessor":"identity"
+	},
+	"Stata": {
+		"accessor":"reference-file"
+	}
+}

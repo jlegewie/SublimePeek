@@ -5,7 +5,7 @@
 		"accessor":"identity"
 	},
 	"Stata": {
-		"accessor":"reference-file"
+		"accessor":"mapping"
 	},
 	"Python": {
 		"accessor":"python"

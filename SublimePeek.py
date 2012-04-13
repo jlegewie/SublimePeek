@@ -43,9 +43,9 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         if(keyword == ""):
             return
 
-        # use reference table to get correct help file
-        if settings.get(lang).get("accessor") == "reference-file":
-            refs = json.load(open(path + '/stata-ref.json', "r"))
+        # use mapping to get correct help file
+        if settings.get(lang).get("accessor") == "mapping":
+            refs = json.load(open(path + '/stata-mapping.json', "r"))
             refs_from = [item['from'] for item in refs]
             i = refs_from.index(keyword)
             keyword = refs[i]['to']

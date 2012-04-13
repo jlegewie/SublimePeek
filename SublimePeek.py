@@ -21,7 +21,7 @@ settings = sublime.load_settings(u'SublimePeek.sublime-settings')
 class SublimePeekCommand(sublime_plugin.TextCommand):
 
     def run(self, edit):
-        settings.get("colorcode_formats")
+
         # get language
         lang = self.get_language()
 

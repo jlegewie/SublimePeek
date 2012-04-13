@@ -32,6 +32,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         # path for help files (check if accessor is not 'python')
         path = sublime.packages_path() + "/SublimePeek-%s-help/" % (lang)
         if not settings.get(lang).get("accessor") == "python" and not os.path.exists(path):
+            sublime.status_message("SublimePeek: No help files found for '" + lang + "'.")
             return
 
         # get keyword

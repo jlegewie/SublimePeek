@@ -52,11 +52,14 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
 
         # Python help support
         if lang == "Python":
+            # set path for help file
+            path = sublime.packages_path() + "/SublimePeek/"
+            # set working dir
+            os.chdir(path)
             # call pydoc to generate help file in html
             args = ['pydoc', '-w', keyword]
             p = subprocess.Popen(args)
             p.wait()
-            path = sublime.packages_path() + "/SublimePeek/"
 
         # set name of help file
         filepath = path + "%s.html" % (keyword)

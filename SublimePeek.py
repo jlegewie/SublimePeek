@@ -12,7 +12,7 @@ import json
 # /usr/bin/qlmanage -p [FILEPATH]
 
 ## linux - gloobus-preview
-# /usr/bin/gloobus-preview filelocation
+# /usr/bin/gloobus-preview [FILEPATH]
 
 ## load settings
 settings = sublime.load_settings(u'SublimePeek.sublime-settings')

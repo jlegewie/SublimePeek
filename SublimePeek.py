@@ -72,7 +72,8 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         # post-processing (language specific)
         if lang == "Python":
             p.wait()
-            os.remove(filepath)
+            if os.path.isfile(filepath):
+                os.remove(filepath)
 
     def get_language(self):
         lang_file = self.view.settings().get('syntax')

@@ -1,4 +1,6 @@
 {
+	"languages": ["Python","R","Stata"],
+
 	"R": {
 		"accessor":"identity"
 	},

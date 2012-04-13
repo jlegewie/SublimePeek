@@ -6,5 +6,8 @@
 	},
 	"Stata": {
 		"accessor":"reference-file"
+	},
+	"Python": {
+		"accessor":"python"
 	}
 }

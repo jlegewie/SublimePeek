@@ -5,7 +5,7 @@ import sublime
 import sublime_plugin
 import subprocess
 import re
-import os.path
+import os
 import json
 
 ## mac os - quicklook
@@ -49,6 +49,14 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
             i = refs_from.index(keyword)
             keyword = refs[i]['to']
 
+        # Python help support
+        if lang == "Python":
+            # call pydoc to generate help file in html
+            args = ['pydoc', '-w', keyword]
+            p = subprocess.Popen(args)
+            p.wait()
+            path = sublime.packages_path() + "/SublimePeek/"
+
         # set name of help file
         filepath = path + "%s.html" % (keyword)
 
@@ -57,9 +65,14 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
             args = ['/usr/bin/qlmanage', '-p', filepath]
             # qlmanage documentation
             # http://developer.apple.com/library/mac/#documentation/Darwin/Reference/ManPages/man1/qlmanage.1.html
-            subprocess.Popen(args)
+            p = subprocess.Popen(args)
         else:
             sublime.status_message("SublimePeek: No help file found for '" + keyword + "'.")
+
+        # post-processing (language specific)
+        if lang == "Python":
+            p.wait()
+            os.remove(filepath)
 
     def get_language(self):
         lang_file = self.view.settings().get('syntax')

@@ -9,7 +9,7 @@ import os.path
 import json
 
 ## mac os - quicklook
-# /usr/bin/qlmanage -p '/Users/jpl2136/Desktop/anette/Causal Inference NYU/Assigments/4 Matching Scores/psbal.ado'
+# /usr/bin/qlmanage -p [FILEPATH]
 
 ## linux - gloobus-preview
 # /usr/bin/gloobus-preview filelocation

@@ -1,7 +1,13 @@
 {
-	"languages": ["Python","R","Stata"],
+	"languages": ["Python","CSS","HTML","R","Stata"],
 
 	"R": {
+		"accessor":"identity"
+	},
+	"CSS": {
+		"accessor":"identity"
+	},
+	"HTML": {
 		"accessor":"identity"
 	},
 	"Stata": {

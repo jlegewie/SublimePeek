@@ -7,6 +7,8 @@ import subprocess
 import re
 import os
 import json
+import urllib2
+import distutils.dir_util
 
 ## mac os - quicklook
 # /usr/bin/qlmanage -p [FILEPATH]
@@ -32,8 +34,8 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         # path for help files (check if accessor is not 'python')
         path = sublime.packages_path() + "/SublimePeek-%s-help/" % (lang)
         if not settings.get(lang).get("accessor") == "python" and not os.path.exists(path):
-            sublime.status_message("SublimePeek: No help files found for '" + lang + "'.")
-            return
+            if not self.get_help_files(lang, path):
+                return
 
         # get keyword
         keyword = self.get_keyword()
@@ -144,3 +146,79 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
             pt += delta
 
         return pt
+
+    def get_help_files(self, lang, path):
+        # prompt user
+        if not sublime.ok_cancel_dialog("SublimePeek\nThe help files for '%s' do not exist. Do you want to download and compile the files now?" % (lang)):
+            sublime.status_message("SublimePeek: Help files for '%s' do are not installed" % (lang))
+            return False
+
+        # let's get started with a small message
+        sublime.status_message("SublimePeek: Downloading and compiling help files for '" + lang + "'...")
+
+        # data files
+        i = ['CSS', 'HTML', 'Python'].index(lang)
+        d = ['css-mdn.json', 'html-mdn.json', 'python.json'][i]
+        url = 'https://raw.github.com/rgarcia/dochub/master/static/data/'
+
+        # html elements
+        note = ['<p class="source-link">This content was sourced by <a href="http://dochub.io/">DocHub</a> from MDN at <a target="_blank" href="https://developer.mozilla.org/en/CSS/%s">https://developer.mozilla.org/en/CSS/%s</a>.</p>', '<p class="source-link">This content was sourced by <a href="http://dochub.io/">DocHub</a> from MDN at <a target="_blank" href="https://developer.mozilla.org/en/HTML/Element/%s">https://developer.mozilla.org/en/CSS/%s</a>.</p>', '<p class="source-link">This content was sourced by <a href="http://dochub.io/">DocHub</a>.</p>'][i]
+
+        html_page = '<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="chrome=1"><title>SublimePeek | Help for %s</title><link href="css/bootstrap.min.css" rel="stylesheet"><style type="text/css">  body {  padding-top: 10px;  padding-bottom: 20px;  padding-left: 10%;  padding-right: 10%;  }  .sidebar-nav {  padding: 9px 0;  }</style><link href="css/bootstrap-responsive.min.css" rel="stylesheet"><link href="css/custom.css" rel="stylesheet">  </head><body><div style="display: block; "><div id="4eea835f8cd2963cba000002" class="page-header"><h2>%s</h2><!--CONTENT-->%s<!--NOTE-->%s</div></div></body>'
+        html_page = html_page.replace("10%", "10%%")
+
+        mapping_element = '\n{"from": "%s","to": "%s"}'
+
+        # create folder if is doesn't exists
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        # copy style files
+        os.makedirs(path + 'css')
+        distutils.dir_util.copy_tree(sublime.packages_path() + "/SublimePeek/help-compiler/DocHub-css", path + 'css')
+
+        # get data from json file at www.github.com/rgarcia/dochub
+        data = json.load(urllib2.urlopen(url + d))
+        # get list of keywords
+        ids = [item['title'] for item in data]
+
+        # create mapping file for Python
+        if lang == "Python":
+            f_map = open(path + "Python-mapping.json", "w")
+            f_map.write("[")
+
+        for id in ids:
+            # get index
+            i = ids.index(id)
+
+            # get html
+            if lang == "Python":
+                html = data[i]['html']
+                names = [item['name'] for item in data[i]['searchableItems']]
+                # domIds = [item['domId'] for item in data[i]['searchableItems']]
+                for k, name in enumerate(names):
+                    f_map.write(mapping_element % (name, id))
+                    if ids != ids[len(ids) - 1]:
+                        f_map.write(',')
+            else:
+                html = "".join(data[i]['sectionHTMLs'])
+            html = html.replace("\n", "")
+
+            # create note content note
+            if "%s" in note:
+                note_content = note % (id, id)
+            else:
+                note_content = note
+
+            # write html file
+            f = open(path + id + ".html", "w")
+            f.write((html_page % (id, id, html, note_content)).encode('utf-8'))
+            f.close()
+
+        if lang == "Python":
+            f_map.write("\n]")
+            f_map.close()
+
+        sublime.status_message("SublimePeek: Help files for '%s' are ready to use." % (lang))
+
+        return True

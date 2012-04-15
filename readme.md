@@ -1,5 +1,6 @@
 # SublimePeek
-SublimePeek provides quick access to documentation by opening help files in Quick Look. Currently, the plugin only runs on Mac OS but it can be extended to work on other unix systems using gloobus-preview as well as Windows using maComfort. The only supported language right now are HTML, CSS, Python and R but again, the plugin can be extended to support other languages. 
+SublimePeek provides quick access to documentation by opening help files in Quick Look. Right now, the plugin supports _HTML_, _CSS_, _Python_ and _R_. The plugin can be extended to support other languages as well.
+Currently, the plugin only runs on Mac OS but it can be extended to work on other unix systems using gloobus-preview as well as Windows using maComfort.
 
 # Installation
 To install SublimePeek, clone or copy this repos to your ST2 packages folder. After finalizing the first version, I will add the plugin to package control.
@@ -8,7 +9,7 @@ To install SublimePeek, clone or copy this repos to your ST2 packages folder. Af
 The python help files are generated on the fly using `pydoc` so that python should work right away.
 
 #### HTML and CSS
-The help files for HTML and CSS are based on [DocHub](http://dochub.io/) and first need to be downloaded and compiled. SublimePeek can do all the work so that you only need to open a css or html file and start using SublimePeek. The first time you will be asked whether you want to install the files during which ST2 is unresponsive. Afterwards, SublimePeek should just work.
+The help files for HTML and CSS are based on [DocHub](http://dochub.io/). They first need to be downloaded and compiled. SublimePeek can do all the work so that you only need to open a css or html file and start using SublimePeek. The first time you will be asked whether you want to install the files during which ST2 is unresponsive. Afterwards, SublimePeek should just work.
 
 #### R
 For R, you have to install the help files yourself. They can be installed from a separate repos    https://github.com/jlegewie/SublimePeek-R-help, which should be cloned/copied to the `[ST2 Packages]/SublimePeek-R-help` folder. Alternatively, SublimePeek contains a help compiler, which allows you to create the help files yourself. Just look in the SublimePeek packages folder under help-compiler for the file `R-help.r`. The advantage of compiling the R help files yourself is that the SublimePeek-R-help repos only contains the help files for the base packages. Using the R help compiler creates the help files for all installed R packages. 

@@ -150,7 +150,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
     def get_help_files(self, lang, path):
         # prompt user
         if not sublime.ok_cancel_dialog("SublimePeek\nThe help files for '%s' do not exist. Do you want to download and compile the files now?" % (lang)):
-            sublime.status_message("SublimePeek: Help files for '%s' do are not installed" % (lang))
+            sublime.status_message("SublimePeek: Help files for '%s' are not installed." % (lang))
             return False
 
         # let's get started with a small message

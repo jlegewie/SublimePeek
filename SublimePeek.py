@@ -148,13 +148,13 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         return pt
 
     def get_help_files(self, lang, path):
-        # prompt user
-        if not sublime.ok_cancel_dialog("SublimePeek\nThe help files for '%s' do not exist. Do you want to download and compile the files now?" % (lang)):
-            sublime.status_message("SublimePeek: Help files for '%s' are not installed." % (lang))
-            return False
-
         # let's get started with a small message
         sublime.status_message("SublimePeek: Downloading and compiling help files for '" + lang + "'...")
+
+        # prompt user
+        if not sublime.ok_cancel_dialog("SublimePeek\nDo you want to download and compile the help files for '%s'?\n\n(Don't panic, ST2 freezes for a moment)" % (lang)):
+            sublime.status_message("SublimePeek: Help files for '%s' are not installed." % (lang))
+            return False
 
         # data files
         i = ['CSS', 'HTML', 'Python'].index(lang)

@@ -12,25 +12,23 @@ Once you install Package Control, restart ST2 and bring up the Command Palette (
 
 **Without Git:** Download the latest source from [GitHub](http://github.com/jlegewie/SublimePeek) and copy the SublimePeek folder to your Sublime Text "Packages" directory.
 
-**With Git:** Clone the repository in your Sublime Text "Packages" directory::
-
-    git clone git://github.com/jlegewie/SublimePeek.git
+**With Git:** Clone the repository in your Sublime Text "Packages" directory: `git clone git://github.com/jlegewie/SublimePeek.git`
 
 
 The "Packages" directory is located at:
 
-* OS X:: `~/Library/Application Support/Sublime Text 2/Packages/`
-* Linux:: `~/.config/sublime-text-2/Packages/`
-* Windows:: `%APPDATA%/Sublime Text 2/Packages/`
+* OS X: `~/Library/Application Support/Sublime Text 2/Packages/`
+* Linux: `~/.config/sublime-text-2/Packages/`
+* Windows: `%APPDATA%/Sublime Text 2/Packages/`
 
 
-#### Python
+### Python
 The python help files are generated on the fly using `pydoc` so that python should work right away.
 
-#### HTML and CSS
+### HTML and CSS
 The help files for HTML and CSS are based on [DocHub](http://dochub.io/). They first need to be downloaded and compiled. SublimePeek can do all the work for you. So just open a css or html file and start using SublimePeek. The first time you will be asked whether you want to install the files (ST2 is unresponsive during that time). Afterwards, SublimePeek should just work.
 
-#### R
+### R
 For R, you have to install the help files yourself. They can be installed from a separate repos    https://github.com/jlegewie/SublimePeek-R-help, which should be cloned/copied to the `[ST2 Packages]/SublimePeek-R-help` folder. Alternatively, SublimePeek contains a help compiler, which allows you to create the help files yourself. Just look in the SublimePeek packages folder under help-compiler for the file `R-help.r`. The advantage of compiling the R help files yourself is that the SublimePeek-R-help repos only contains the help files for the base packages. Using the R help compiler creates the help files for all installed R packages. 
 
 ## Using SublimePeek

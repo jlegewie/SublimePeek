@@ -19,17 +19,9 @@ Once you install Package Control, restart ST2 and bring up the Command Palette (
 
 The "Packages" directory is located at:
 
-* OS X::
-
-    ~/Library/Application Support/Sublime Text 2/Packages/
-
-* Linux::
-
-    ~/.config/sublime-text-2/Packages/
-
-* Windows::
-
-    %APPDATA%/Sublime Text 2/Packages/
+* OS X:: `~/Library/Application Support/Sublime Text 2/Packages/`
+* Linux:: `~/.config/sublime-text-2/Packages/`
+* Windows:: `%APPDATA%/Sublime Text 2/Packages/`
 
 
 #### Python

@@ -3,19 +3,18 @@ SublimePeek provides quick access to documentation by opening help files in Quic
 Currently, the plugin only runs on Mac OS but it can be extended to work on other unix systems using gloobus-preview as well as Windows using maComfort.
 
 ## Installation
-The easiest way to 
-
 (instructions copied and modified from https://github.com/Kronuz/SublimeLinter)
+
 
 **With the Package Control plugin:** The easiest way to install SublimePeek is through Package Control, which can be found at this site: http://wbond.net/sublime_packages/package_control
 
 Once you install Package Control, restart ST2 and bring up the Command Palette (``Command+Shift+P`` on OS X, ``Control+Shift+P`` on Linux/Windows). Select "Package Control: Install Package", wait while Package Control fetches the latest package list, then select SublimePeek when the list appears. The advantage of using this method is that Package Control will automatically keep SublimePeek up to date with the latest version.
 
-**Without Git:** Download the latest source from `GitHub <http://github.com/jlegewie/SublimePeek>`_ and copy the SublimePeek folder to your Sublime Text "Packages" directory.
+**Without Git:** Download the latest source from [GitHub](http://github.com/jlegewie/SublimePeek) and copy the SublimePeek folder to your Sublime Text "Packages" directory.
 
 **With Git:** Clone the repository in your Sublime Text "Packages" directory::
 
-    git clone git://github.com/Kronuz/SublimePeek.git
+    git clone git://github.com/jlegewie/SublimePeek.git
 
 
 The "Packages" directory is located at:

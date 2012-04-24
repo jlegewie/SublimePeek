@@ -120,9 +120,11 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         # if no file found, show overview
         else:
             if settings.get("overview") and self.accessor == "identity":
-                keyword = os.listdir(self.path)
-                for f, file in enumerate(keyword):
-                    keyword[f] = file.replace(".html", "")
+                files = os.listdir(self.path)
+                keyword = []
+                for f, file in enumerate(files):
+                    if ".html" in file:
+                        keyword.append(file.replace(".html", ""))
                 self.select_help_file(keyword, [])
             else:
                 sublime.status_message("SublimePeek: No help file found for '" + keyword + "'.")

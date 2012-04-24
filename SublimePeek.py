@@ -87,6 +87,14 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
                 args = ['pydoc', '-w', keyword]
                 p = subprocess.Popen(args)
                 p.wait()
+            # generate rubin help file
+            if self.lang == "Ruby":
+                args = ['ri', keyword]
+                # '--format html'
+                output = subprocess.check_output(args)
+                if "More than one method matched your request." in output:
+                    output = output.replace("\n", "").replace(" ", "")
+
             # generate help files for other languages (e.g. )
 
         # show help file

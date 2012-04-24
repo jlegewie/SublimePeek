@@ -1,5 +1,5 @@
 {
-	"languages": ["Python","CSS","HTML","JavaScript","R","Stata"],
+	"languages": ["Python","Ruby","CSS","HTML","JavaScript","R","Stata"],
 	"overview":true,
 
 	"R": {
@@ -15,6 +15,9 @@
 		"accessor":"mapping"
 	},
 	"Python": {
+		"accessor":"python"
+	},
+	"Ruby": {
 		"accessor":"python"
 	},
 	"JavaScript": {

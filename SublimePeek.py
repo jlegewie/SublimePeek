@@ -215,8 +215,6 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         html_page = '<!DOCTYPE html><html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="chrome=1"><title>SublimePeek | Help for %s</title><link href="css/bootstrap.min.css" rel="stylesheet"><style type="text/css">  body {  padding-top: 10px;  padding-bottom: 20px;  padding-left: 10%;  padding-right: 10%;  }  .sidebar-nav {  padding: 9px 0;  }</style><link href="css/bootstrap-responsive.min.css" rel="stylesheet"><link href="css/custom.css" rel="stylesheet">  </head><body><div style="display: block; "><div id="4eea835f8cd2963cba000002" class="page-header"><h2>%s</h2><!--CONTENT-->%s<!--NOTE-->%s</div></div></body></html>'
         html_page = html_page.replace("10%", "10%%")
 
-        mapping_element = '\n{"from": "%s","to": "%s"}'
-
         # create folder if is doesn't exists
         if not os.path.exists(path):
             os.makedirs(path)
@@ -232,6 +230,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
 
         # create mapping file for Python
         if lang == "Python":
+            mapping_element = '\n{"from": "%s","to": "%s"}'
             f_map = open(path + "Python-mapping.json", "w")
             f_map.write("[")
 
@@ -258,9 +257,9 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
                 html = "".join(data[i]['sectionHTMLs'])
             html = html.replace("\n", "")
 
-            # mapping file
+            # mapping file for javascript
             if lang == "JavaScript":
-                # split at . to get method name such as Array.length unicode
+                # split at . to get method name such as Array.length
                 fn = id.split(".")[-1]
                 # get the summary of the function
                 summary = html.split("<p>")[1].split("</p>")[0]
@@ -292,7 +291,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
             f_map.write("\n]")
             f_map.close()
 
-        # write mapping file from list elements
+        # write javascript mapping file from list elements
         if lang == "JavaScript":
             # structure of mapping.json file
             mapping_element = '\n  {\n      "from": "%s",\n      "to": %s,\n      "sum": %s\n  }'

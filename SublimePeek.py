@@ -49,11 +49,9 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
 
         # get keyword from selection
         keyword = self.get_keyword()
-        sublime.status_message("SublimePeek: Help for '" + keyword + "'")
 
-        # exit if no keyword defined and accessor is python
-        if keyword == "":
-            self.show_overview()
+        # exit if no keyword defined and setting:overview is false
+        if keyword == ""  and self.accessor == "python" and not settings.get("overview"):
             return
 
         # use mapping to get correct keyword
@@ -61,22 +59,21 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
             # load mapping file
             map = json.load(open(self.path + '/%s-mapping.json' % (self.lang), "r"))
             map_from = [item['from'] for item in map]
-            # exit if no help defined
-            if not keyword in map_from:
-                self.show_overview(map)
-                #sublime.status_message("SublimePeek: No help file found for '" + keyword + "'.")
-                return
 
-            # use map to get keyword
-            i = map_from.index(keyword)
-            to = map[i]['to']
-            if isinstance(to, str):
-                keyword = to
-            if isinstance(to, list):
-                if len(to) > 1:
-                    self.select_help_file(to, map[i]['sum'])
+            # get keyword from map
+            if keyword in map_from:
+                # use map to get keyword
+                i = map_from.index(keyword)
+                keyword = map[i]['to']
+            # if keyword not in map, compile list for overview
+            else:
+                if settings.get("overview"):
+                    map_to = [item['to'] for item in map]
+                    keyword = []
+                    for obj in map_to:
+                        keyword.append(obj[0])
                 else:
-                    keyword = to[0]
+                    return
 
         # generate help file using python (language specific)
         if self.accessor == "python":
@@ -93,54 +90,42 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
             # generate help files for other languages (e.g. )
 
         # show help file
-        p = self.show_help(keyword)
+        if isinstance(keyword, (str, unicode)):
+            self.show_help(keyword)
+        if isinstance(keyword, list):
+            if len(keyword) == 1:
+                self.show_help(keyword[0])
+            else:
+                self.select_help_file(keyword, [])
 
         # remove help file if generated on the fly (self.accessor == "python")
         if self.accessor == "python":
-            if p != -1:
-                p.wait()
             if os.path.isfile(self.filepath):
                 os.remove(self.filepath)
 
     # call quick look to show help file
     def show_help(self, keyword):
+        sublime.status_message("SublimePeek: " + keyword)
         # set filepath of help file
         self.filepath = self.path + "%s.html" % (keyword)
 
         # quick look
         if os.path.isfile(self.filepath):
+            sublime.status_message("SublimePeek: Help for '" + keyword + "'")
             args = ['/usr/bin/qlmanage', '-p', self.filepath]
             # qlmanage documentation list
             # http://developer.apple.com/library/mac/#documentation/Darwin/Reference/ManPages/man1/qlmanage.1.html
             p = subprocess.Popen(args)
-            return p
+            p.wait()
+        # if no file found, show overview
         else:
-            if self.accessor == "identity":
-                self.show_overview()
+            if settings.get("overview") and self.accessor == "identity":
+                keyword = os.listdir(self.path)
+                for f, file in enumerate(keyword):
+                    keyword[f] = file.replace(".html", "")
+                self.select_help_file(keyword, [])
             else:
                 sublime.status_message("SublimePeek: No help file found for '" + keyword + "'.")
-
-        return -1
-
-    def show_overview(self, map=""):
-        # For accessor == "identity", use the files in the folder
-        if self.accessor == "identity":
-            files = os.listdir(self.path)
-            for f, file in enumerate(files):
-                files[f] = file.replace(".html", "")
-            self.select_help_file(files, [])
-        # For accessor == "mapping", use all 'to' elements in mapping file
-        if self.accessor == "mapping":
-            # reload mapping file if not passed as argument
-            if map == "":
-                map = json.load(open(self.path + '/%s-mapping.json' % (self.lang), "r"))
-            # get all to files
-            map_to = [item['to'] for item in map]
-            files = []
-            for obj in map_to:
-                files.append(obj[0])
-            # open selection dialog
-            self.select_help_file(files, [])
 
     def get_language(self):
         lang_file = self.view.settings().get('syntax')

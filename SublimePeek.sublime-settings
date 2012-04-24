@@ -1,5 +1,6 @@
 {
 	"languages": ["Python","CSS","HTML","JavaScript","R","Stata"],
+	"overview":true,
 
 	"R": {
 		"accessor":"identity"

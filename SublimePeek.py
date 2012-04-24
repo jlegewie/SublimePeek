@@ -195,6 +195,8 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
 
         return pt
 
+    # function to download and compule help files from DocHub
+    # sorry, the function is a little messy
     def get_help_files(self, lang, path):
         # let's get started with a small message
         sublime.status_message("SublimePeek: Downloading and compiling help files for '" + lang + "'...")

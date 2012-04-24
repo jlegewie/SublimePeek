@@ -141,7 +141,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         keyword = sep.split(s_str)[0]
         return keyword
 
-    # use ST2 show_quick_panel to let the user select a help files of multiple functions with the same name exsists (e.g. methods for different classes such as String.length and Array.length)
+    # use ST2 show_quick_panel to let the user select a help files from a list of functions (e.g. methods for different classes such as String.length and Array.length)
     def select_help_file(self, options, description):
         def on_done(index):
             if index != -1:

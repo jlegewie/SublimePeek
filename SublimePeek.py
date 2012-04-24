@@ -51,8 +51,9 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         keyword = self.get_keyword()
         sublime.status_message("SublimePeek: Help for '" + keyword + "'")
 
-        # exit if no keyword defined
-        if(keyword == ""):
+        # exit if no keyword defined and accessor is python
+        if keyword == "":
+            self.show_overview()
             return
 
         # use mapping to get correct keyword
@@ -62,7 +63,8 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
             map_from = [item['from'] for item in map]
             # exit if no help defined
             if not keyword in map_from:
-                sublime.status_message("SublimePeek: No help file found for '" + keyword + "'.")
+                self.show_overview(map)
+                #sublime.status_message("SublimePeek: No help file found for '" + keyword + "'.")
                 return
 
             # use map to get keyword
@@ -108,14 +110,37 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         # quick look
         if os.path.isfile(self.filepath):
             args = ['/usr/bin/qlmanage', '-p', self.filepath]
-            # qlmanage documentation
+            # qlmanage documentation list
             # http://developer.apple.com/library/mac/#documentation/Darwin/Reference/ManPages/man1/qlmanage.1.html
             p = subprocess.Popen(args)
             return p
         else:
-            sublime.status_message("SublimePeek: No help file found for '" + keyword + "'.")
+            if self.accessor == "identity":
+                self.show_overview()
+            else:
+                sublime.status_message("SublimePeek: No help file found for '" + keyword + "'.")
 
         return -1
+
+    def show_overview(self, map=""):
+        # For accessor == "identity", use the files in the folder
+        if self.accessor == "identity":
+            files = os.listdir(self.path)
+            for f, file in enumerate(files):
+                files[f] = file.replace(".html", "")
+            self.select_help_file(files, [])
+        # For accessor == "mapping", use all 'to' elements in mapping file
+        if self.accessor == "mapping":
+            # reload mapping file if not passed as argument
+            if map == "":
+                map = json.load(open(self.path + '/%s-mapping.json' % (self.lang), "r"))
+            # get all to files
+            map_to = [item['to'] for item in map]
+            files = []
+            for obj in map_to:
+                files.append(obj[0])
+            # open selection dialog
+            self.select_help_file(files, [])
 
     def get_language(self):
         lang_file = self.view.settings().get('syntax')

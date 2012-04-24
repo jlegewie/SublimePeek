@@ -1,5 +1,5 @@
 {
-	"languages": ["Python","CSS","HTML","R","Stata"],
+	"languages": ["Python","CSS","HTML","JavaScript","R","Stata"],
 
 	"R": {
 		"accessor":"identity"
@@ -15,5 +15,8 @@
 	},
 	"Python": {
 		"accessor":"python"
+	},
+	"JavaScript": {
+		"accessor":"mapping"
 	}
 }

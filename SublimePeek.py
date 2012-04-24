@@ -9,6 +9,7 @@ import os
 import json
 import urllib2
 import distutils.dir_util
+from htmlentitydefs import name2codepoint
 
 ## mac os - quicklook
 # /usr/bin/qlmanage -p [FILEPATH]
@@ -21,23 +22,31 @@ settings = sublime.load_settings(u'SublimePeek.sublime-settings')
 
 
 class SublimePeekCommand(sublime_plugin.TextCommand):
+    lang = ""
+    path = ""
+    filepath = ""
 
     def run(self, edit):
 
         # get language
-        lang = self.get_language()
+        self.lang = self.get_language()
 
         # check whether language is supported
-        if not lang in settings.get("languages"):
+        if not self.lang in settings.get("languages"):
             return
+        # get accessor from settings
+        accessor = settings.get(self.lang).get("accessor")
 
-        # path for help files (check if accessor is not 'python')
-        path = sublime.packages_path() + "/SublimePeek-%s-help/" % (lang)
-        if not settings.get(lang).get("accessor") == "python" and not os.path.exists(path):
-            if not self.get_help_files(lang, path):
-                return
+        # path for help files
+        self.path = sublime.packages_path() + "/SublimePeek-%s-help/" % (self.lang)
+        # check whether help files exists unless generated on the fly ("accessor" == "python")
+        if not accessor == "python":
+            if not os.path.exists(self.path):
+                # compile help files or exit if compiling fails
+                if not self.get_help_files(self.lang, self.path):
+                    return
 
-        # get keyword
+        # get keyword from selection
         keyword = self.get_keyword()
         sublime.status_message("SublimePeek: Help for '" + keyword + "'")
 
@@ -45,41 +54,67 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         if(keyword == ""):
             return
 
-        # use mapping to get correct help file
-        if settings.get(lang).get("accessor") == "mapping":
-            refs = json.load(open(path + '/stata-mapping.json', "r"))
-            refs_from = [item['from'] for item in refs]
-            i = refs_from.index(keyword)
-            keyword = refs[i]['to']
+        # use mapping to get correct keyword
+        if accessor == "mapping":
+            # load mapping file
+            map = json.load(open(self.path + '/%s-mapping.json' % (self.lang), "r"))
+            map_from = [item['from'] for item in map]
+            # exit if no help defined
+            if not keyword in map_from:
+                sublime.status_message("SublimePeek: No help file found for '" + keyword + "'.")
+                return
 
-        # Python help support
-        if lang == "Python":
-            # set path for help file
-            path = sublime.packages_path() + "/SublimePeek/"
-            # set working dir
-            os.chdir(path)
-            # call pydoc to generate help file in html
-            args = ['pydoc', '-w', keyword]
-            p = subprocess.Popen(args)
-            p.wait()
+            # use map to get keyword
+            i = map_from.index(keyword)
+            to = map[i]['to']
+            if isinstance(to, str):
+                keyword = to
+            if isinstance(to, list):
+                if len(to) > 1:
+                    self.select_help_file(to, map[i]['sum'])
+                else:
+                    keyword = to[0]
 
-        # set name of help file
-        filepath = path + "%s.html" % (keyword)
+        # generate help file using python (language specific)
+        if accessor == "python":
+            # generate python help file
+            if self.lang == "Python":
+                # set path for help file
+                self.path = sublime.packages_path() + "/SublimePeek/"
+                # set working dir
+                os.chdir(self.path)
+                # call pydoc to generate help file in html
+                args = ['pydoc', '-w', keyword]
+                p = subprocess.Popen(args)
+                p.wait()
+            # generate help files for other languages (e.g. )
+
+        # show help file
+        p = self.show_help(keyword)
+
+        # remove help file if generated on the fly (accessor == "python")
+        if accessor == "python":
+            if p != -1:
+                p.wait()
+            if os.path.isfile(self.filepath):
+                os.remove(self.filepath)
+
+    # call quick look to show help file
+    def show_help(self, keyword):
+        # set filepath of help file
+        self.filepath = self.path + "%s.html" % (keyword)
 
         # quick look
-        if os.path.isfile(filepath):
-            args = ['/usr/bin/qlmanage', '-p', filepath]
+        if os.path.isfile(self.filepath):
+            args = ['/usr/bin/qlmanage', '-p', self.filepath]
             # qlmanage documentation
             # http://developer.apple.com/library/mac/#documentation/Darwin/Reference/ManPages/man1/qlmanage.1.html
             p = subprocess.Popen(args)
+            return p
         else:
             sublime.status_message("SublimePeek: No help file found for '" + keyword + "'.")
 
-        # post-processing (language specific)
-        if lang == "Python":
-            p.wait()
-            if os.path.isfile(filepath):
-                os.remove(filepath)
+        return -1
 
     def get_language(self):
         lang_file = self.view.settings().get('syntax')
@@ -106,13 +141,16 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         return keyword
 
     # use ST2 show_quick_panel to let the user select a help files of multiple functions with the same name exsists (e.g. methods for different classes such as String.length and Array.length)
-    def select_help_file(self):
-        self.view.window().show_quick_panel(
-                [
-                    ["[] square", "fsdsd"], "() round",
-                    "<> angle", "{} curly"
-                ],
-                self.fn)
+    def select_help_file(self, options, description):
+        def on_done(index):
+            if index != -1:
+                self.show_help(options[index])
+        items = []
+        for k, op in enumerate(options):
+            items.append([op, description[k]])
+
+        # show quick panel for selection of help file
+        self.view.window().show_quick_panel(items, on_done)
 
     # adopted from 'expand_word' in default/delete_word.py
     # modifed to get whole word to right and left of pos
@@ -166,12 +204,12 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
             return False
 
         # data files
-        i = ['CSS', 'HTML', 'Python'].index(lang)
-        d = ['css-mdn.json', 'html-mdn.json', 'python.json'][i]
+        i = ['CSS', 'HTML', 'Python', 'JavaScript'].index(lang)
+        d = ['css-mdn.json', 'html-mdn.json', 'python.json', 'js-mdn.json'][i]
         url = 'https://raw.github.com/rgarcia/dochub/master/static/data/'
 
         # html elements
-        note = ['<p class="source-link">This content was sourced by <a href="http://dochub.io/">DocHub</a> from MDN at <a target="_blank" href="https://developer.mozilla.org/en/CSS/%s">https://developer.mozilla.org/en/CSS/%s</a>.</p>', '<p class="source-link">This content was sourced by <a href="http://dochub.io/">DocHub</a> from MDN at <a target="_blank" href="https://developer.mozilla.org/en/HTML/Element/%s">https://developer.mozilla.org/en/CSS/%s</a>.</p>', '<p class="source-link">This content was sourced by <a href="http://dochub.io/">DocHub</a>.</p>'][i]
+        note = ['<p class="source-link">This content was sourced by <a href="http://dochub.io/">DocHub</a> from MDN at <a target="_blank" href="https://developer.mozilla.org/en/CSS/%s">https://developer.mozilla.org/en/CSS/%s</a>.</p>', '<p class="source-link">This content was sourced by <a href="http://dochub.io/">DocHub</a> from MDN at <a target="_blank" href="https://developer.mozilla.org/en/HTML/Element/%s">https://developer.mozilla.org/en/CSS/%s</a>.</p>', '<p class="source-link">This content was sourced by <a href="http://dochub.io/">DocHub</a>.</p>', '<p class="source-link">This content was sourced by <a href="http://dochub.io/">DocHub</a>.</p>'][i]
 
         html_page = '<!DOCTYPE html><html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="chrome=1"><title>SublimePeek | Help for %s</title><link href="css/bootstrap.min.css" rel="stylesheet"><style type="text/css">  body {  padding-top: 10px;  padding-bottom: 20px;  padding-left: 10%;  padding-right: 10%;  }  .sidebar-nav {  padding: 9px 0;  }</style><link href="css/bootstrap-responsive.min.css" rel="stylesheet"><link href="css/custom.css" rel="stylesheet">  </head><body><div style="display: block; "><div id="4eea835f8cd2963cba000002" class="page-header"><h2>%s</h2><!--CONTENT-->%s<!--NOTE-->%s</div></div></body></html>'
         html_page = html_page.replace("10%", "10%%")
@@ -196,6 +234,12 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
             f_map = open(path + "Python-mapping.json", "w")
             f_map.write("[")
 
+        # define elements of mapping file as list
+        if lang == "JavaScript":
+            map_from = []
+            map_to = []
+            map_sum = []
+
         for id in ids:
             # get index
             i = ids.index(id)
@@ -213,7 +257,26 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
                 html = "".join(data[i]['sectionHTMLs'])
             html = html.replace("\n", "")
 
-            # create note content note
+            # mapping file
+            if lang == "JavaScript":
+                # split at . to get method name such as Array.length unicode
+                fn = id.split(".")[-1]
+                # get the summary of the function
+                summary = html.split("<p>")[1].split("</p>")[0]
+                p = re.compile(r'<.*?>')
+                summary = p.sub('', summary)[1:54] + "..."
+                # add function to lists of mapping file
+                # append to list for to, if function already exists
+                if fn in map_from:
+                    k = map_from.index(fn)
+                    map_to[k].append(id)
+                    map_sum[k].append(summary)
+                else:
+                    map_from.append(fn)
+                    map_to.append([id])
+                    map_sum.append([summary])
+
+            # create note content
             if "%s" in note:
                 note_content = note % (id, id)
             else:
@@ -228,6 +291,40 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
             f_map.write("\n]")
             f_map.close()
 
-        sublime.status_message("SublimePeek: Help files for '%s' are ready to use." % (lang))
+        # write mapping file from list elements
+        if lang == "JavaScript":
+            # structure of mapping.json file
+            mapping_element = '\n  {\n      "from": "%s",\n      "to": %s,\n      "sum": %s\n  }'
+            # open file for writing
+            f_map = open(path + "JavaScript-mapping.json", "w")
+            f_map.write("[")
+            # iterate through elements in list
+            for fn in map_from:
+                k = map_from.index(fn)
+                # get all to and summary elements as single string in list form
+                ids = "["
+                summary = "["
+                for j, id in enumerate(map_to[k]):
+                    ids += '"' + id + '",'
+                    summary += '"' + map_sum[k][j] + '",'
 
+                ids = (ids + "]").replace(",]", "]")
+                summary = (summary + "]").replace(",]", "]")
+                # write element to mapping file
+                f_map.write(mapping_element % (fn, ids, summary))
+                if fn != map_from[- 1]:
+                    f_map.write(',')
+
+            # close mapping file
+            f_map.write("\n]")
+            f_map.close()
+
+        # done!
+        sublime.status_message("SublimePeek: Help files for '%s' are ready to use." % (lang))
         return True
+
+    @staticmethod
+    def unescape(s):
+        "unescape HTML code refs; c.f. http://wiki.python.org/moin/EscapingHtml"
+        return re.sub('&(%s);' % '|'.join(name2codepoint),
+                  lambda m: unichr(name2codepoint[m.group(1)]), s)

@@ -23,6 +23,7 @@ settings = sublime.load_settings(u'SublimePeek.sublime-settings')
 
 class SublimePeekCommand(sublime_plugin.TextCommand):
     lang = ""
+    accessor = ""
     path = ""
     filepath = ""
 
@@ -35,12 +36,12 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         if not self.lang in settings.get("languages"):
             return
         # get accessor from settings
-        accessor = settings.get(self.lang).get("accessor")
+        self.accessor = settings.get(self.lang).get("accessor")
 
         # path for help files
         self.path = sublime.packages_path() + "/SublimePeek-%s-help/" % (self.lang)
         # check whether help files exists unless generated on the fly ("accessor" == "python")
-        if not accessor == "python":
+        if not self.accessor == "python":
             if not os.path.exists(self.path):
                 # compile help files or exit if compiling fails
                 if not self.get_help_files(self.lang, self.path):
@@ -55,7 +56,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
             return
 
         # use mapping to get correct keyword
-        if accessor == "mapping":
+        if self.accessor == "mapping":
             # load mapping file
             map = json.load(open(self.path + '/%s-mapping.json' % (self.lang), "r"))
             map_from = [item['from'] for item in map]
@@ -76,7 +77,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
                     keyword = to[0]
 
         # generate help file using python (language specific)
-        if accessor == "python":
+        if self.accessor == "python":
             # generate python help file
             if self.lang == "Python":
                 # set path for help file
@@ -92,8 +93,8 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         # show help file
         p = self.show_help(keyword)
 
-        # remove help file if generated on the fly (accessor == "python")
-        if accessor == "python":
+        # remove help file if generated on the fly (self.accessor == "python")
+        if self.accessor == "python":
             if p != -1:
                 p.wait()
             if os.path.isfile(self.filepath):

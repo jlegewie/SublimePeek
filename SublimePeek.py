@@ -105,6 +105,15 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         keyword = sep.split(s_str)[0]
         return keyword
 
+    # use ST2 show_quick_panel to let the user select a help files of multiple functions with the same name exsists (e.g. methods for different classes such as String.length and Array.length)
+    def select_help_file(self):
+        self.view.window().show_quick_panel(
+                [
+                    ["[] square", "fsdsd"], "() round",
+                    "<> angle", "{} curly"
+                ],
+                self.fn)
+
     # adopted from 'expand_word' in default/delete_word.py
     # modifed to get whole word to right and left of pos
     def get_word(self, view, pos):

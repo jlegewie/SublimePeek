@@ -320,7 +320,8 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         # write javascript mapping file from list elements
         if lang == "JavaScript":
             # structure of mapping.json file
-            mapping_element = '\n  {\n      "from": "%s",\n      "to": %s,\n      "sum": %s\n  }'
+            # mapping_element = '\n  {\n      "from": "%s",\n      "to": %s,\n      "sum": %s\n  }'
+            mapping_element = '\n  {\n      "from": "%s",\n      "to": %s\n}'
             # open file for writing
             f_map = open(path + "JavaScript-mapping.json", "w")
             f_map.write("[")
@@ -329,15 +330,15 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
                 k = map_from.index(fn)
                 # get all to and summary elements as single string in list form
                 ids = "["
-                summary = "["
+                # summary = "["
                 for j, id in enumerate(map_to[k]):
                     ids += '"' + id + '",'
-                    summary += '"' + map_sum[k][j] + '",'
+                    # summary += '"' + map_sum[k][j] + '",'
 
                 ids = (ids + "]").replace(",]", "]")
-                summary = (summary + "]").replace(",]", "]")
+                # summary = (summary + "]").replace(",]", "]")
                 # write element to mapping file
-                f_map.write(mapping_element % (fn, ids, summary))
+                f_map.write(mapping_element % (fn, ids))
                 if fn != map_from[- 1]:
                     f_map.write(',')
 

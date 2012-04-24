@@ -146,9 +146,13 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         def on_done(index):
             if index != -1:
                 self.show_help(options[index])
-        items = []
-        for k, op in enumerate(options):
-            items.append([op, description[k]])
+        # get list with option and description
+        if len(description) == len(options):
+            items = []
+            for k, op in enumerate(options):
+                items.append([op, description[k]])
+        else:
+            items = options
 
         # show quick panel for selection of help file
         self.view.window().show_quick_panel(items, on_done)

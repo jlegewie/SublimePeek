@@ -170,7 +170,6 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
                 f.write(html_page % (keyword, keyword, content))
                 f.close()
 
-
             def on_done(index):
                 if index != -1:
                     keyword = keywords[index]

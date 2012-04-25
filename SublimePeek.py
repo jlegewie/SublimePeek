@@ -127,6 +127,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         onExit when the subprocess completes.
         onExit is a callable object, and args is a list/tuple of args that
         would give to subprocess.Popen.
+        Source: http://stackoverflow.com/questions/2581817/python-subprocess-callback-when-cmd-exits
         """
         def runInThread(onExit, popenArgs):
             proc = subprocess.Popen(popenArgs)

@@ -1,6 +1,8 @@
 ## SublimePeek
-SublimePeek provides quick access to documentation by opening help files in Quick Look. The plugin supports _HTML_, _CSS_, _JavaScript_, _PHP_, _Python_, _Ruby_ and _R_. Support for other languages can be added easily.
+SublimePeek provides quick access to documentation by opening help files in Quick Look. The plugin supports _HTML_, _CSS_, _JavaScript_, _PHP_, _Python_, _Ruby_, _R_, and _Stata_. Support for other languages can be added easily.
 Currently, the plugin only runs on Mac OS but it can be extended to work on other unix systems using gloobus-preview as well as Windows using maComfort.
+
+**Supported Languages:** _HTML_, _CSS_, _JavaScript_, _PHP_, _Python_, _Ruby_, _R_, and _Stata_
 
 ## Installation
 (instructions copied and modified from https://github.com/Kronuz/SublimeLinter)
@@ -28,9 +30,10 @@ The python help files are generated on the fly using `pydoc` for Python and `ri`
 ### HTML, CSS, JavaScript, and PHP
 The help files for HTML, CSS, JavaScript, and PHP are based on [DocHub](http://dochub.io/). They first need to be downloaded and compiled. SublimePeek can do all the work for you. So just open a corresponding file and start using SublimePeek. The first time you will be asked whether you want to download and compile the files, which takes a moment.
 
-### R
+### R and Stata
 For R, you have to install the help files yourself. They are available as an additional package from Package Control (`SublimePeek-R-help`) or on a separate GitHub repos at https://github.com/jlegewie/SublimePeek-R-help.
-Alternatively, SublimePeek contains a help compiler, which allows you to create the help files yourself. Just look in the SublimePeek packages folder under `help-compiler` for the file `R-help.r`. The advantage of compiling the R help files yourself is that the SublimePeek-R-help repos only contains the help files for the base packages and ggplot2. Using the R help compiler creates the help files for all installed R packages. 
+Alternatively, SublimePeek contains a help compiler, which allows you to create the help files yourself. Just look in the SublimePeek packages folder under `help-compiler` for the file `R-help.r`. The advantage of compiling the R help files yourself is that the SublimePeek-R-help repos only contains the help files for the base packages and ggplot2. Using the R help compiler creates the help files for all installed R packages.
+The Stata help files are currently not available as a separate package but can easily be compiled using the Stata do-file `Stata-help.r` in the `help-compiler` folder. If people are interested in these files, I can add them as an additional ST2 package.
 
 ## Using SublimePeek
 Just select a function, and press `super+shift+h`. If the language is supported by SublimePeek, you should now see a Quick Look window with the documentation for the function. Actually, you don't have to select the function. SublimePeek automatically uses the word at the current cursor position or the word before the opening `(`. `json.lo|ad`, however, does not work because the dot interrupts the word. If no help file is found, SublimePeek displays an overview of all available help files from which the user can quickly pick. 

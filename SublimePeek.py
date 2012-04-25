@@ -80,50 +80,9 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
 
         # generate help file using python (language specific)
         if self.accessor == "python":
-            # set path for help file
-            self.path = sublime.packages_path() + "/SublimePeek/"
-
-            # generate python help file
-            if self.lang == "Python":
-                # set working dir
-                os.chdir(self.path)
-                # call pydoc to generate help file in html
-                args = ['pydoc', '-w', keyword]
-                p = subprocess.Popen(args)
-                p.wait()
-            # generate rubin help file
-            if self.lang == "Ruby":
-                def on_done(index):
-                    if index != -1:
-                        keyword = keywords[index]
-                        # get selected help file
-                        args = ['ri', '--format', 'html', keyword]
-                        output = subprocess.Popen(args, stdout=subprocess.PIPE).communicate()[0]
-                        # save selected help files
-                        f = open(self.path + "ruby.html", "w")
-                        f.write(output)
-                        f.close()
-                        # show help file
-                        self.show_help("ruby")
-
-                # get help for keyword
-                args = ['ri', '--format', 'html', keyword]
-                # '--format html'
-                output = subprocess.Popen(args, stdout=subprocess.PIPE).communicate()[0]
-                # more than one match for keyword
-                if "More than one method matched your request." in output:
-                    output = output.replace("\n", "").replace(" ", "")
-                    keywords = output.split("mationononeof:")[1].split(",")
-
-                    # show quick panel for selection of help file
-                    self.view.window().show_quick_panel(keywords, on_done)
-                    return
-                else:
-                    keyword = "ruby"
-                    # save selected help files
-                    f = open(self.path + "ruby.html", "w")
-                    f.write(output)
-                    f.close()
+            keyword = self.create_help_file(keyword)
+            if keyword == False:
+                return
 
         # show help file
         if isinstance(keyword, (str, unicode)):
@@ -184,6 +143,56 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
                 self.select_help_file(keyword, [])
             else:
                 sublime.status_message("SublimePeek: No help file found for '" + keyword + "'.")
+
+    def create_help_file(self, keyword):
+        # set path for help file
+        self.path = sublime.packages_path() + "/SublimePeek/"
+
+        # generate python help file
+        if self.lang == "Python":
+            # set working dir
+            os.chdir(self.path)
+            # call pydoc to generate help file in html
+            args = ['pydoc', '-w', keyword]
+            p = subprocess.Popen(args)
+            p.wait()
+            return keyword
+
+        # generate rubin help file
+        if self.lang == "Ruby":
+            def on_done(index):
+                if index != -1:
+                    keyword = keywords[index]
+                    # get selected help file
+                    args = ['ri', '--format', 'html', keyword]
+                    output = subprocess.Popen(args, stdout=subprocess.PIPE).communicate()[0]
+                    # save selected help files
+                    f = open(self.path + "ruby.html", "w")
+                    f.write(output)
+                    f.close()
+                    # show help file
+                    self.show_help("ruby")
+
+            # get help for keyword
+            args = ['ri', '--format', 'html', keyword]
+            # '--format html'
+            output = subprocess.Popen(args, stdout=subprocess.PIPE).communicate()[0]
+            # more than one match for keyword
+            if "More than one method matched your request." in output:
+                output = output.replace("\n", "").replace(" ", "")
+                keywords = output.split("mationononeof:")[1].split(",")
+
+                # show quick panel for selection of help file
+                self.view.window().show_quick_panel(keywords, on_done)
+                return False
+            # save file if only one match
+            else:
+                keyword = "ruby"
+                # save selected help files
+                f = open(self.path + "ruby.html", "w")
+                f.write(output)
+                f.close()
+                return keyword
 
     def get_language(self):
         lang_file = self.view.settings().get('syntax')

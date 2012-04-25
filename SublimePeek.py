@@ -202,9 +202,20 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
                 return keyword
 
     def get_language(self):
+        # get language file
         lang_file = self.view.settings().get('syntax')
         lang = lang_file.split('/')
         lang = lang[len(lang) - 1].split('.')[0]
+        # get scope for embedded PHP, JS, or CSS
+        if lang == "HTML":
+            scope = self.view.syntax_name(self.view.sel()[0].b)
+            if "source.php.embedded.block.html" in scope:
+                lang = "PHP"
+            if "source.js.embedded.html" in scope:
+                lang = "JavaScript"
+            if "source.css.embedded.html" in scope:
+                lang = "CSS"
+        # return language
         return lang
 
     def get_keyword(self):

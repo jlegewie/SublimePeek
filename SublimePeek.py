@@ -255,7 +255,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
     # http://net.tutsplus.com/tutorials/python-tutorials/how-to-create-a-sublime-text-2-plugin/
     def get_help_files(self):
         # prompt user
-        if not sublime.ok_cancel_dialog("SublimePeek\nDo you want to download and compile the help files for '%s'?\n\n(Don't panic, ST2 freezes for a moment)" % (self.lang)):
+        if not sublime.ok_cancel_dialog("SublimePeek\nDo you want to download and compile the help files for '%s'?" % (self.lang)):
             sublime.status_message("SublimePeek: Help files for '%s' are not installed." % (self.lang))
             return
         # start download thread

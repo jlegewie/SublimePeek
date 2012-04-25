@@ -22,6 +22,10 @@ settings = sublime.load_settings(u'SublimePeek.sublime-settings')
 
 
 class SublimePeekCommand(sublime_plugin.TextCommand):
+    # supported languages and accessors
+    languages = ("Python", "Ruby", "CSS", "HTML", "JavaScript", "R", "Stata")
+    accessors = ("python", "python", "identity", "identity", "mapping", "identity", "mapping")
+    # class variables
     lang = ""
     accessor = ""
     path = ""
@@ -33,10 +37,10 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         self.lang = self.get_language()
 
         # check whether language is supported
-        if not self.lang in settings.get("languages"):
+        if not self.lang in self.languages:
             return
         # get accessor from settings
-        self.accessor = settings.get(self.lang).get("accessor")
+        self.accessor = self.accessors[self.languages.index(self.lang)]
 
         # path for help files
         self.path = sublime.packages_path() + "/SublimePeek-%s-help/" % (self.lang)

@@ -45,8 +45,10 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         if not self.accessor == "python":
             if not os.path.exists(self.path):
                 # compile help files or exit if compiling fails
-                if not self.get_help_files(self.lang, self.path):
-                    return
+                self.get_help_files()
+                return
+                #if not self.get_help_files(self.lang, self.path):
+                #    return
 
         # get keyword from selection
         keyword = self.get_keyword()
@@ -248,19 +250,66 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
 
         return pt
 
-    # function to download and compule help files from DocHub
-    # sorry, the function is a little messy
-    def get_help_files(self, lang, path):
-        # let's get started with a small message
-        sublime.status_message("SublimePeek: Downloading and compiling help files for '" + lang + "'...")
-
+    # download and compile help files from DocHub
+    # the threading code was adopted from 
+    # http://net.tutsplus.com/tutorials/python-tutorials/how-to-create-a-sublime-text-2-plugin/
+    def get_help_files(self):
         # prompt user
-        if not sublime.ok_cancel_dialog("SublimePeek\nDo you want to download and compile the help files for '%s'?\n\n(Don't panic, ST2 freezes for a moment)" % (lang)):
-            sublime.status_message("SublimePeek: Help files for '%s' are not installed." % (lang))
-            return False
+        if not sublime.ok_cancel_dialog("SublimePeek\nDo you want to download and compile the help files for '%s'?\n\n(Don't panic, ST2 freezes for a moment)" % (self.lang)):
+            sublime.status_message("SublimePeek: Help files for '%s' are not installed." % (self.lang))
+            return
+        # start download thread
+        threads = []
+        thread = GetHelpFiles(self.lang, self.path, 5)
+        threads.append(thread)
+        thread.start()
+
+        self.handle_threads(threads)
+
+    def handle_threads(self, threads, offset=0, i=0, dir=1):
+        next_threads = []
+        for thread in threads:
+            if thread.is_alive():
+                next_threads.append(thread)
+                continue
+            if thread.result == False:
+                continue
+            #offset = self.replace(thread, offset)
+        threads = next_threads
+
+        if len(threads):
+            # This animates a little activity indicator in the status area
+            before = i % 8
+            after = (7) - before
+            if not after:
+                dir = -1
+            if not before:
+                dir = 1
+            i += dir
+            self.view.set_status('peek', 'SublimePeek [%s=%s]' % \
+                (' ' * before, ' ' * after))
+
+            sublime.set_timeout(lambda: self.handle_threads(threads, offset, i, dir), 100)
+            return
+
+        self.view.erase_status('peek')
+        sublime.status_message("SublimePeek: Help files for '%s' are ready to use." % (self.lang))
+
+
+class GetHelpFiles(threading.Thread):
+    def __init__(self, lang, path, timeout):
+        # self.sel = sel
+        # self.original = string
+        self.lang = lang
+        self.path = path
+        self.timeout = timeout
+        self.result = None
+        threading.Thread.__init__(self)
+
+    def run(self):
 
         # data files
-        i = ['CSS', 'HTML', 'Python', 'JavaScript'].index(lang)
+        i = ['CSS', 'HTML', 'Python', 'JavaScript'].index(self.lang)
         d = ['css-mdn.json', 'html-mdn.json', 'python.json', 'js-mdn.json'][i]
         url = 'https://raw.github.com/rgarcia/dochub/master/static/data/'
 
@@ -271,26 +320,26 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         html_page = html_page.replace("10%", "10%%")
 
         # create folder if is doesn't exists
-        if not os.path.exists(path):
-            os.makedirs(path)
+        if not os.path.exists(self.path):
+            os.makedirs(self.path)
 
         # copy style files
-        os.makedirs(path + 'css')
-        distutils.dir_util.copy_tree(sublime.packages_path() + "/SublimePeek/help-compiler/DocHub-css", path + 'css')
+        os.makedirs(self.path + 'css')
+        distutils.dir_util.copy_tree(sublime.packages_path() + "/SublimePeek/help-compiler/DocHub-css", self.path + 'css')
 
         # get data from json file at www.github.com/rgarcia/dochub
-        data = json.load(urllib2.urlopen(url + d))
+        data = json.load(urllib2.urlopen(url + d, timeout=self.timeout))
         # get list of keywords
         ids = [item['title'] for item in data]
 
         # create mapping file for Python
-        if lang == "Python":
+        if self.lang == "Python":
             mapping_element = '\n{"from": "%s","to": "%s"}'
-            f_map = open(path + "Python-mapping.json", "w")
+            f_map = open(self.path + "Python-mapping.json", "w")
             f_map.write("[")
 
         # define elements of mapping file as list
-        if lang == "JavaScript":
+        if self.lang == "JavaScript":
             map_from = []
             map_to = []
             map_sum = []
@@ -300,7 +349,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
             i = ids.index(id)
 
             # get html
-            if lang == "Python":
+            if self.lang == "Python":
                 html = data[i]['html']
                 names = [item['name'] for item in data[i]['searchableItems']]
                 # domIds = [item['domId'] for item in data[i]['searchableItems']]
@@ -313,7 +362,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
             html = html.replace("\n", "")
 
             # mapping file for javascript
-            if lang == "JavaScript":
+            if self.lang == "JavaScript":
                 # split at . to get method name such as Array.length
                 fn = id.split(".")[-1]
                 # get the summary of the function
@@ -338,21 +387,21 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
                 note_content = note
 
             # write html file
-            f = open(path + id + ".html", "w")
+            f = open(self.path + id + ".html", "w")
             f.write((html_page % (id, id, html, note_content)).encode('utf-8'))
             f.close()
 
-        if lang == "Python":
+        if self.lang == "Python":
             f_map.write("\n]")
             f_map.close()
 
         # write javascript mapping file from list elements
-        if lang == "JavaScript":
+        if self.lang == "JavaScript":
             # structure of mapping.json file
             # mapping_element = '\n  {\n      "from": "%s",\n      "to": %s,\n      "sum": %s\n  }'
             mapping_element = '\n  {\n      "from": "%s",\n      "to": %s\n}'
             # open file for writing
-            f_map = open(path + "JavaScript-mapping.json", "w")
+            f_map = open(self.path + "JavaScript-mapping.json", "w")
             f_map.write("[")
             # iterate through elements in list
             for fn in map_from:
@@ -376,11 +425,11 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
             f_map.close()
 
         # done!
-        sublime.status_message("SublimePeek: Help files for '%s' are ready to use." % (lang))
-        return True
+        self.result = True
+        return
 
-    @staticmethod
-    def unescape(s):
-        "unescape HTML code refs; c.f. http://wiki.python.org/moin/EscapingHtml"
-        return re.sub('&(%s);' % '|'.join(name2codepoint),
-                  lambda m: unichr(name2codepoint[m.group(1)]), s)
+    # @staticmethod
+    # def unescape(s):
+    #     "unescape HTML code refs; c.f. http://wiki.python.org/moin/EscapingHtml"
+    #     return re.sub('&(%s);' % '|'.join(name2codepoint),
+    #               lambda m: unichr(name2codepoint[m.group(1)]), s)

@@ -23,8 +23,8 @@ settings = sublime.load_settings(u'SublimePeek.sublime-settings')
 
 class SublimePeekCommand(sublime_plugin.TextCommand):
     # supported languages and accessors
-    languages = ("Python", "Ruby", "CSS", "HTML", "JavaScript", "R", "Stata")
-    accessors = ("python", "python", "identity", "identity", "mapping", "identity", "mapping")
+    languages = ("Python", "Ruby", "CSS", "HTML", "JavaScript", "PHP", "R", "Stata")
+    accessors = ("python", "python", "identity", "identity", "mapping", "identity", "identity", "mapping")
     # class variables
     lang = ""
     accessor = ""
@@ -353,15 +353,20 @@ class GetHelpFiles(threading.Thread):
     def run(self):
         try:
             # data files
-            i = ['CSS', 'HTML', 'Python', 'JavaScript'].index(self.lang)
-            d = ['css-mdn.json', 'html-mdn.json', 'python.json', 'js-mdn.json'][i]
+            i = ['CSS', 'HTML', 'Python', 'JavaScript', 'PHP'].index(self.lang)
+            d = ['css-mdn.json', 'html-mdn.json', 'python.json', 'js-mdn.json', 'php-ext.json'][i]
             url = 'https://raw.github.com/rgarcia/dochub/master/static/data/'
 
             # get data from json file at www.github.com/rgarcia/dochub
             data = json.load(urllib2.urlopen(url + d, timeout=self.timeout))
 
             # html elements
-            note = ['<p class="source-link">This content was sourced by <a href="http://dochub.io/">DocHub</a> from MDN at <a target="_blank" href="https://developer.mozilla.org/en/CSS/%s">https://developer.mozilla.org/en/CSS/%s</a>.</p>', '<p class="source-link">This content was sourced by <a href="http://dochub.io/">DocHub</a> from MDN at <a target="_blank" href="https://developer.mozilla.org/en/HTML/Element/%s">https://developer.mozilla.org/en/CSS/%s</a>.</p>', '<p class="source-link">This content was sourced by <a href="http://dochub.io/">DocHub</a>.</p>', '<p class="source-link">This content was sourced by <a href="http://dochub.io/">DocHub</a> from MDN.</p>'][i]
+            note = [
+                '<p class="source-link">This content was sourced by <a href="http://dochub.io/">DocHub</a> from MDN at <a target="_blank" href="https://developer.mozilla.org/en/CSS/%s">https://developer.mozilla.org/en/CSS/%s</a>.</p>',
+                '<p class="source-link">This content was sourced by <a href="http://dochub.io/">DocHub</a> from MDN at <a target="_blank" href="https://developer.mozilla.org/en/HTML/Element/%s">https://developer.mozilla.org/en/CSS/%s</a>.</p>',
+                '<p class="source-link">This content was sourced by <a href="http://dochub.io/">DocHub</a>.</p>',
+                '<p class="source-link">This content was sourced by <a href="http://dochub.io/">DocHub</a> from MDN.</p>',
+                '<p class="source-link">This content was sourced by <a href="http://dochub.io/">DocHub</a> from MDN.</p>'][i]
 
             html_page = '<!DOCTYPE html><html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="chrome=1"><title>SublimePeek | Help for %s</title><link href="css/bootstrap.min.css" rel="stylesheet"><style type="text/css">  body {  padding-top: 10px;  padding-bottom: 20px;  padding-left: 10%;  padding-right: 10%;  }  .sidebar-nav {  padding: 9px 0;  }</style><link href="css/bootstrap-responsive.min.css" rel="stylesheet"><link href="css/custom.css" rel="stylesheet">  </head><body><div style="display: block; "><div id="4eea835f8cd2963cba000002" class="page-header"><h2>%s</h2><!--CONTENT-->%s<!--NOTE-->%s</div></div></body></html>'
             html_page = html_page.replace("10%", "10%%")

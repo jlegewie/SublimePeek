@@ -387,7 +387,6 @@ class GetHelpFiles(threading.Thread):
             if self.lang == "JavaScript":
                 map_from = []
                 map_to = []
-                map_sum = []
 
             for id in ids:
                 # get index
@@ -410,20 +409,13 @@ class GetHelpFiles(threading.Thread):
                 if self.lang == "JavaScript":
                     # split at . to get method name such as Array.length
                     fn = id.split(".")[-1]
-                    # get the summary of the function
-                    #summary = html.split("<p>")[1].split("</p>")[0]
-                    #p = re.compile(r'<.*?>')
-                    #summary = p.sub('', summary)[1:54] + "..."
-                    # add function to lists of mapping file
                     # append to list for to, if function already exists
                     if fn in map_from:
                         k = map_from.index(fn)
                         map_to[k].append(id)
-                        #map_sum[k].append(summary)
                     else:
                         map_from.append(fn)
                         map_to.append([id])
-                        #map_sum.append([summary])
 
                 # create note content
                 if "%s" in note:
@@ -446,7 +438,6 @@ class GetHelpFiles(threading.Thread):
                 map_from.append("if")
                 map_to.append(["if...else"])
                 # structure of mapping.json file
-                # mapping_element = '\n  {\n      "from": "%s",\n      "to": %s,\n      "sum": %s\n  }'
                 mapping_element = '\n  {\n      "from": "%s",\n      "to": %s\n  }'
                 # open file for writing
                 f_map = open(self.path + "JavaScript-mapping.json", "w")
@@ -456,15 +447,12 @@ class GetHelpFiles(threading.Thread):
                 for fn in map_from:
                     k = map_from.index(fn)
                     if len(map_to[k]) > 1 or map_to[k][0] != fn:
-                        # get all to and summary elements as single string in list form
+                        # get all to element as single string in list form
                         ids = "["
-                        # summary = "["
                         for j, id in enumerate(map_to[k]):
                             ids += '"' + id + '",'
-                            # summary += '"' + map_sum[k][j] + '",'
 
                         ids = (ids + "]").replace(",]", "]")
-                        # summary = (summary + "]").replace(",]", "]")
                         # write element to mapping file
                         if not f_begin:
                             f_map.write(',')

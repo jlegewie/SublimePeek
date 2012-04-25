@@ -251,7 +251,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         return pt
 
     # download and compile help files from DocHub
-    # the threading code was adopted from 
+    # the threading code was adopted from
     # http://net.tutsplus.com/tutorials/python-tutorials/how-to-create-a-sublime-text-2-plugin/
     def get_help_files(self):
         # prompt user
@@ -275,6 +275,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
             if thread.result == False:
                 continue
             #offset = self.replace(thread, offset)
+            sublime.status_message("SublimePeek: Help files for '%s' are ready to use." % (self.lang))
         threads = next_threads
 
         if len(threads):
@@ -293,7 +294,6 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
             return
 
         self.view.erase_status('peek')
-        sublime.status_message("SublimePeek: Help files for '%s' are ready to use." % (self.lang))
 
 
 class GetHelpFiles(threading.Thread):
@@ -307,127 +307,135 @@ class GetHelpFiles(threading.Thread):
         threading.Thread.__init__(self)
 
     def run(self):
+        try:
+            # data files
+            i = ['CSS', 'HTML', 'Python', 'JavaScript'].index(self.lang)
+            d = ['css-mdn.json', 'html-mdn.json', 'python.json', 'js-mdn.json'][i]
+            url = 'https://raw.github.com/rgarcia/dochub/master/static/data/'
 
-        # data files
-        i = ['CSS', 'HTML', 'Python', 'JavaScript'].index(self.lang)
-        d = ['css-mdn.json', 'html-mdn.json', 'python.json', 'js-mdn.json'][i]
-        url = 'https://raw.github.com/rgarcia/dochub/master/static/data/'
+            # get data from json file at www.github.com/rgarcia/dochub
+            data = json.load(urllib2.urlopen(url + d, timeout=self.timeout))
 
-        # html elements
-        note = ['<p class="source-link">This content was sourced by <a href="http://dochub.io/">DocHub</a> from MDN at <a target="_blank" href="https://developer.mozilla.org/en/CSS/%s">https://developer.mozilla.org/en/CSS/%s</a>.</p>', '<p class="source-link">This content was sourced by <a href="http://dochub.io/">DocHub</a> from MDN at <a target="_blank" href="https://developer.mozilla.org/en/HTML/Element/%s">https://developer.mozilla.org/en/CSS/%s</a>.</p>', '<p class="source-link">This content was sourced by <a href="http://dochub.io/">DocHub</a>.</p>', '<p class="source-link">This content was sourced by <a href="http://dochub.io/">DocHub</a> from MDN.</p>'][i]
+            # html elements
+            note = ['<p class="source-link">This content was sourced by <a href="http://dochub.io/">DocHub</a> from MDN at <a target="_blank" href="https://developer.mozilla.org/en/CSS/%s">https://developer.mozilla.org/en/CSS/%s</a>.</p>', '<p class="source-link">This content was sourced by <a href="http://dochub.io/">DocHub</a> from MDN at <a target="_blank" href="https://developer.mozilla.org/en/HTML/Element/%s">https://developer.mozilla.org/en/CSS/%s</a>.</p>', '<p class="source-link">This content was sourced by <a href="http://dochub.io/">DocHub</a>.</p>', '<p class="source-link">This content was sourced by <a href="http://dochub.io/">DocHub</a> from MDN.</p>'][i]
 
-        html_page = '<!DOCTYPE html><html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="chrome=1"><title>SublimePeek | Help for %s</title><link href="css/bootstrap.min.css" rel="stylesheet"><style type="text/css">  body {  padding-top: 10px;  padding-bottom: 20px;  padding-left: 10%;  padding-right: 10%;  }  .sidebar-nav {  padding: 9px 0;  }</style><link href="css/bootstrap-responsive.min.css" rel="stylesheet"><link href="css/custom.css" rel="stylesheet">  </head><body><div style="display: block; "><div id="4eea835f8cd2963cba000002" class="page-header"><h2>%s</h2><!--CONTENT-->%s<!--NOTE-->%s</div></div></body></html>'
-        html_page = html_page.replace("10%", "10%%")
+            html_page = '<!DOCTYPE html><html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="chrome=1"><title>SublimePeek | Help for %s</title><link href="css/bootstrap.min.css" rel="stylesheet"><style type="text/css">  body {  padding-top: 10px;  padding-bottom: 20px;  padding-left: 10%;  padding-right: 10%;  }  .sidebar-nav {  padding: 9px 0;  }</style><link href="css/bootstrap-responsive.min.css" rel="stylesheet"><link href="css/custom.css" rel="stylesheet">  </head><body><div style="display: block; "><div id="4eea835f8cd2963cba000002" class="page-header"><h2>%s</h2><!--CONTENT-->%s<!--NOTE-->%s</div></div></body></html>'
+            html_page = html_page.replace("10%", "10%%")
 
-        # create folder if is doesn't exists
-        if not os.path.exists(self.path):
-            os.makedirs(self.path)
+            # create folder if is doesn't exists
+            if not os.path.exists(self.path):
+                os.makedirs(self.path)
 
-        # copy style files
-        os.makedirs(self.path + 'css')
-        distutils.dir_util.copy_tree(sublime.packages_path() + "/SublimePeek/help-compiler/DocHub-css", self.path + 'css')
+            # copy style files
+            os.makedirs(self.path + 'css')
+            distutils.dir_util.copy_tree(sublime.packages_path() + "/SublimePeek/help-compiler/DocHub-css", self.path + 'css')
 
-        # get data from json file at www.github.com/rgarcia/dochub
-        data = json.load(urllib2.urlopen(url + d, timeout=self.timeout))
-        # get list of keywords
-        ids = [item['title'] for item in data]
+            # get list of keywords
+            ids = [item['title'] for item in data]
 
-        # create mapping file for Python
-        if self.lang == "Python":
-            mapping_element = '\n{"from": "%s","to": "%s"}'
-            f_map = open(self.path + "Python-mapping.json", "w")
-            f_map.write("[")
-
-        # define elements of mapping file as list
-        if self.lang == "JavaScript":
-            map_from = []
-            map_to = []
-            map_sum = []
-
-        for id in ids:
-            # get index
-            i = ids.index(id)
-
-            # get html
+            # create mapping file for Python
             if self.lang == "Python":
-                html = data[i]['html']
-                names = [item['name'] for item in data[i]['searchableItems']]
-                # domIds = [item['domId'] for item in data[i]['searchableItems']]
-                for k, name in enumerate(names):
-                    f_map.write(mapping_element % (name, id))
-                    if ids != ids[len(ids) - 1]:
-                        f_map.write(',')
-            else:
-                html = "".join(data[i]['sectionHTMLs'])
-            html = html.replace("\n", "")
+                mapping_element = '\n{"from": "%s","to": "%s"}'
+                f_map = open(self.path + "Python-mapping.json", "w")
+                f_map.write("[")
 
-            # mapping file for javascript
+            # define elements of mapping file as list
             if self.lang == "JavaScript":
-                # split at . to get method name such as Array.length
-                fn = id.split(".")[-1]
-                # get the summary of the function
-                summary = html.split("<p>")[1].split("</p>")[0]
-                p = re.compile(r'<.*?>')
-                summary = p.sub('', summary)[1:54] + "..."
-                # add function to lists of mapping file
-                # append to list for to, if function already exists
-                if fn in map_from:
-                    k = map_from.index(fn)
-                    map_to[k].append(id)
-                    map_sum[k].append(summary)
+                map_from = []
+                map_to = []
+                map_sum = []
+
+            for id in ids:
+                # get index
+                i = ids.index(id)
+
+                # get html
+                if self.lang == "Python":
+                    html = data[i]['html']
+                    names = [item['name'] for item in data[i]['searchableItems']]
+                    # domIds = [item['domId'] for item in data[i]['searchableItems']]
+                    for k, name in enumerate(names):
+                        f_map.write(mapping_element % (name, id))
+                        if ids != ids[len(ids) - 1]:
+                            f_map.write(',')
                 else:
-                    map_from.append(fn)
-                    map_to.append([id])
-                    map_sum.append([summary])
+                    html = "".join(data[i]['sectionHTMLs'])
+                html = html.replace("\n", "")
 
-            # create note content
-            if "%s" in note:
-                note_content = note % (id, id)
-            else:
-                note_content = note
+                # mapping file for javascript
+                if self.lang == "JavaScript":
+                    # split at . to get method name such as Array.length
+                    fn = id.split(".")[-1]
+                    # get the summary of the function
+                    summary = html.split("<p>")[1].split("</p>")[0]
+                    p = re.compile(r'<.*?>')
+                    summary = p.sub('', summary)[1:54] + "..."
+                    # add function to lists of mapping file
+                    # append to list for to, if function already exists
+                    if fn in map_from:
+                        k = map_from.index(fn)
+                        map_to[k].append(id)
+                        map_sum[k].append(summary)
+                    else:
+                        map_from.append(fn)
+                        map_to.append([id])
+                        map_sum.append([summary])
 
-            # write html file
-            f = open(self.path + id + ".html", "w")
-            f.write((html_page % (id, id, html, note_content)).encode('utf-8'))
-            f.close()
+                # create note content
+                if "%s" in note:
+                    note_content = note % (id, id)
+                else:
+                    note_content = note
 
-        if self.lang == "Python":
-            f_map.write("\n]")
-            f_map.close()
+                # write html file
+                f = open(self.path + id + ".html", "w")
+                f.write((html_page % (id, id, html, note_content)).encode('utf-8'))
+                f.close()
 
-        # write javascript mapping file from list elements
-        if self.lang == "JavaScript":
-            # structure of mapping.json file
-            # mapping_element = '\n  {\n      "from": "%s",\n      "to": %s,\n      "sum": %s\n  }'
-            mapping_element = '\n  {\n      "from": "%s",\n      "to": %s\n}'
-            # open file for writing
-            f_map = open(self.path + "JavaScript-mapping.json", "w")
-            f_map.write("[")
-            # iterate through elements in list
-            for fn in map_from:
-                k = map_from.index(fn)
-                # get all to and summary elements as single string in list form
-                ids = "["
-                # summary = "["
-                for j, id in enumerate(map_to[k]):
-                    ids += '"' + id + '",'
-                    # summary += '"' + map_sum[k][j] + '",'
+            if self.lang == "Python":
+                f_map.write("\n]")
+                f_map.close()
 
-                ids = (ids + "]").replace(",]", "]")
-                # summary = (summary + "]").replace(",]", "]")
-                # write element to mapping file
-                f_map.write(mapping_element % (fn, ids))
-                if fn != map_from[- 1]:
-                    f_map.write(',')
+            # write javascript mapping file from list elements
+            if self.lang == "JavaScript":
+                # structure of mapping.json file
+                # mapping_element = '\n  {\n      "from": "%s",\n      "to": %s,\n      "sum": %s\n  }'
+                mapping_element = '\n  {\n      "from": "%s",\n      "to": %s\n}'
+                # open file for writing
+                f_map = open(self.path + "JavaScript-mapping.json", "w")
+                f_map.write("[")
+                # iterate through elements in list
+                for fn in map_from:
+                    k = map_from.index(fn)
+                    # get all to and summary elements as single string in list form
+                    ids = "["
+                    # summary = "["
+                    for j, id in enumerate(map_to[k]):
+                        ids += '"' + id + '",'
+                        # summary += '"' + map_sum[k][j] + '",'
 
-            # close mapping file
-            f_map.write("\n]")
-            f_map.close()
+                    ids = (ids + "]").replace(",]", "]")
+                    # summary = (summary + "]").replace(",]", "]")
+                    # write element to mapping file
+                    f_map.write(mapping_element % (fn, ids))
+                    if fn != map_from[- 1]:
+                        f_map.write(',')
 
-        # done!
-        self.result = True
-        return
+                # close mapping file
+                f_map.write("\n]")
+                f_map.close()
 
+            # done!
+            self.result = True
+            return
+
+        except (urllib2.HTTPError) as (e):
+            err = '%s: HTTP error %s contacting API' % (__name__, str(e.code))
+        except (urllib2.URLError) as (e):
+            err = '%s: URL error %s contacting API' % (__name__, str(e.reason))
+
+        sublime.error_message(err)
+        self.result = False
     # @staticmethod
     # def unescape(s):
     #     "unescape HTML code refs; c.f. http://wiki.python.org/moin/EscapingHtml"

@@ -159,6 +159,14 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
 
         # generate rubin help file
         if self.lang == "Ruby":
+            def write_ruby_file(keyword, content):
+                html_page = '<!DOCTYPE html><html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="chrome=1"><title>SublimePeek | Help for %s</title><link href="help-compiler/ruby.css" rel="stylesheet"><style type="text/css">  body {  padding-top: 10px;  padding-bottom: 20px;  padding-left: 10%;  padding-right: 10%;  }  .sidebar-nav {  padding: 9px 0;  }</style></head><body><div style="display: block; "><div class="page-header"><h1>%s</h2><!--CONTENT-->%s</div></div></body></html>'
+                html_page = html_page.replace("10%", "10%%")
+                f = open(self.path + "ruby.html", "w")
+                f.write(html_page % (keyword, keyword, content))
+                f.close()
+
+
             def on_done(index):
                 if index != -1:
                     keyword = keywords[index]
@@ -166,9 +174,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
                     args = ['ri', '--format', 'html', keyword]
                     output = subprocess.Popen(args, stdout=subprocess.PIPE).communicate()[0]
                     # save selected help files
-                    f = open(self.path + "ruby.html", "w")
-                    f.write(output)
-                    f.close()
+                    write_ruby_file(keyword, output)
                     # show help file
                     self.show_help("ruby")
 
@@ -186,11 +192,9 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
                 return False
             # save file if only one match
             else:
-                keyword = "ruby"
                 # save selected help files
-                f = open(self.path + "ruby.html", "w")
-                f.write(output)
-                f.close()
+                write_ruby_file(keyword, output)
+                keyword = "ruby"
                 return keyword
 
     def get_language(self):

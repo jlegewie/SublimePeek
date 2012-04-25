@@ -71,15 +71,16 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
                 # use map to get keyword
                 i = map_from.index(keyword)
                 keyword = map[i]['to']
-            # if keyword not in map, compile list for overview
+            # if keyword not in map, check wether file can be access directly and otherwise compile list for overview
             else:
-                if settings.get("overview"):
-                    map_to = [item['to'] for item in map]
-                    keyword = []
-                    for obj in map_to:
-                        keyword.append(obj[0])
-                else:
-                    return
+                if not os.path.isfile(self.path + "%s.html" % (keyword)):
+                    if settings.get("overview"):
+                        map_to = [item['to'] for item in map]
+                        keyword = []
+                        for obj in map_to:
+                            keyword.append(obj[0])
+                    else:
+                        return
 
         # generate help file using python (language specific)
         if self.accessor == "python":

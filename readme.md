@@ -2,7 +2,7 @@
 SublimePeek provides quick access to documentation by opening help files in Quick Look. The plugin supports _HTML_, _CSS_, _JavaScript_, _PHP_, _Python_, _Ruby_, _R_, and _Stata_. Support for other languages can be added easily.
 Currently, the plugin only runs on Mac OS but it can be extended to work on other unix systems using gloobus-preview as well as Windows using maComfort.
 
-**Supported Languages:** _HTML_, _CSS_, _JavaScript_, _PHP_, _Python_, _Ruby_, _R_, and _Stata_
+**Supported Languages:** HTML, CSS, JavaScript, PHP, Python, Ruby, R, and Stata
 
 ## Installation
 (instructions copied and modified from https://github.com/Kronuz/SublimeLinter)

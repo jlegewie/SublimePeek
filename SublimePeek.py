@@ -75,10 +75,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
             else:
                 if not os.path.isfile(self.path + "%s.html" % (keyword)):
                     if settings.get("overview"):
-                        map_to = [item['to'] for item in map]
-                        keyword = []
-                        for obj in map_to:
-                            keyword.append(obj[0])
+                        keyword = self.get_list_of_help_topics(map)
                     else:
                         return
 
@@ -139,11 +136,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         # if no file found, show overview
         else:
             if settings.get("overview") and self.accessor == "identity":
-                files = os.listdir(self.path)
-                keyword = []
-                for f, file in enumerate(files):
-                    if ".html" in file:
-                        keyword.append(file.replace(".html", ""))
+                keyword = self.get_list_of_help_topics()
                 self.select_help_file(keyword, [])
             else:
                 sublime.status_message("SublimePeek: No help file found for '" + keyword + "'.")
@@ -251,6 +244,23 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
 
         # show quick panel for selection of help file
         self.view.window().show_quick_panel(items, on_done)
+
+    def get_list_of_help_topics(self, map=""):
+        keyword = []
+        # get keywords from mapping file
+        if map != "":
+            map_to = [item['to'] for item in map]
+            for obj in map_to:
+                keyword.append(obj[0])
+        # get keywords from files in folder
+        files = os.listdir(self.path)
+        for f, file in enumerate(files):
+            if ".html" in file:
+                keyword.append(file.replace(".html", ""))
+        # clean list (remove dupicates and sort)
+        keyword = sorted(list(set(keyword)))
+        # return list of keywords
+        return keyword
 
     # adopted from 'expand_word' in default/delete_word.py
     # modifed to get whole word to right and left of pos

@@ -462,8 +462,3 @@ class GetHelpFiles(threading.Thread):
 
         sublime.error_message(err)
         self.result = False
-    # @staticmethod
-    # def unescape(s):
-    #     "unescape HTML code refs; c.f. http://wiki.python.org/moin/EscapingHtml"
-    #     return re.sub('&(%s);' % '|'.join(name2codepoint),
-    #               lambda m: unichr(name2codepoint[m.group(1)]), s)

@@ -4,6 +4,7 @@
 import sublime
 import sublime_plugin
 import subprocess
+import threading
 import re
 import os
 import json
@@ -91,11 +92,19 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
             if self.lang == "Ruby":
                 args = ['ri', keyword]
                 # '--format html'
-                output = subprocess.check_output(args)
+                output = subprocess.Popen(args, stdout=subprocess.PIPE).communicate()[0]
                 if "More than one method matched your request." in output:
                     output = output.replace("\n", "").replace(" ", "")
+                    keywords = output.split("mationononeof:")[1].split(",")
 
-            # generate help files for other languages (e.g. )
+                def on_done(index):
+                    if index != -1:
+                        keyword = keywords[index]
+
+                # show quick panel for selection of help file
+                self.view.window().show_quick_panel(keywords, on_done)
+                sublime.status_message("RUBY: " + "sds")
+                return
 
         # show help file
         if isinstance(keyword, (str, unicode)):
@@ -106,10 +115,28 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
             else:
                 self.select_help_file(keyword, [])
 
+    def postPeek(self):
         # remove help file if generated on the fly (self.accessor == "python")
         if self.accessor == "python":
             if os.path.isfile(self.filepath):
                 os.remove(self.filepath)
+
+    def popenAndCall(self, popenArgs, onExit):
+        """
+        Runs the given args in a subprocess.Popen, and then calls the function
+        onExit when the subprocess completes.
+        onExit is a callable object, and args is a list/tuple of args that
+        would give to subprocess.Popen.
+        """
+        def runInThread(onExit, popenArgs):
+            proc = subprocess.Popen(popenArgs)
+            proc.wait()
+            onExit()
+            return
+        thread = threading.Thread(target=runInThread, args=(onExit, popenArgs))
+        thread.start()
+        # returns immediately after the thread starts
+        return thread
 
     # call quick look to show help file
     def show_help(self, keyword):
@@ -123,8 +150,9 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
             args = ['/usr/bin/qlmanage', '-p', self.filepath]
             # qlmanage documentation list
             # http://developer.apple.com/library/mac/#documentation/Darwin/Reference/ManPages/man1/qlmanage.1.html
-            p = subprocess.Popen(args)
-            p.wait()
+            self.popenAndCall(args, self.postPeek)
+            #p = subprocess.Popen(args)
+            #p.wait()
         # if no file found, show overview
         else:
             if settings.get("overview") and self.accessor == "identity":

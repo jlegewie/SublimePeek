@@ -10,7 +10,6 @@ import os
 import json
 import urllib2
 import distutils.dir_util
-from htmlentitydefs import name2codepoint
 
 ## mac os - quicklook
 # /usr/bin/qlmanage -p [FILEPATH]

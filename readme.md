@@ -33,6 +33,7 @@ The help files for HTML, CSS, JavaScript, and PHP are based on [DocHub](http://d
 ### R and Stata
 For R, you have to install the help files yourself. They are available as an additional package from Package Control (`SublimePeek-R-help`) or on a separate GitHub repos at https://github.com/jlegewie/SublimePeek-R-help.
 Alternatively, SublimePeek contains a help compiler, which allows you to create the help files yourself. Just look in the SublimePeek packages folder under `help-compiler` for the file `R-help.r`. The advantage of compiling the R help files yourself is that the SublimePeek-R-help repos only contains the help files for the base packages and ggplot2. Using the R help compiler creates the help files for all installed R packages.
+
 The Stata help files are currently not available as a separate package but can easily be compiled using the Stata do-file `Stata-help.r` in the `help-compiler` folder. If people are interested in these files, I can add them as an additional ST2 package.
 
 ## Using SublimePeek

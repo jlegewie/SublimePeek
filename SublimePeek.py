@@ -159,7 +159,6 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
                     # get selected help file
                     args = calls[self.lang] + [keyword]
                     output = subprocess.Popen(args, stdout=subprocess.PIPE).communicate()[0]
-                    print args
                     # save selected help files
                     if self.lang == 'Ruby':
                         write_ruby_file(keyword, output)

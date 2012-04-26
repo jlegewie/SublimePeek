@@ -83,7 +83,7 @@ for(pkg in pkg.loaded) {
 }
 
 # copy style file (R.css) to folder with R help files
-file.copy(paste(loc,"SublimePeek/help-compiler/R.css",sep=""),paste(loc,"SublimePeek-R-help/R.css",sep=""))
+file.copy(paste(loc,"SublimePeek/css/R.css",sep=""),paste(loc,"SublimePeek-R-help/R.css",sep=""))
 
 # end of file ggplot
 cat("\n\nHelp files from ",n.f," functions in ", n.p," packages saved to JSON.\n")

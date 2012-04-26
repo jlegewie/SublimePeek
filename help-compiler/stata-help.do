@@ -14,7 +14,7 @@ cap mkdir "$st2/SublimePeek-Stata-help"
 cd "$st2/SublimePeek-Stata-help"
 
 * copy style file
-copy "$st2/SublimePeek/help-compiler/Stata.css" "$st2/SublimePeek-Stata-help/Stata.css", replace
+copy "$st2/SublimePeek/css/Stata.css" "$st2/SublimePeek-Stata-help/Stata.css", replace
 
 * get 'all' stata commands 
 global path_cmd "$st2/SublimePeek-Stata-help/stata-cmd.txt"

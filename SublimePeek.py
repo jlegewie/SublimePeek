@@ -170,7 +170,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
             self.view.window().show_quick_panel(keywords, callback)
 
         def write_ruby_file(keyword, content):
-            html_page = '<!DOCTYPE html><html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="chrome=1"><title>SublimePeek | Help for %s</title><link href="help-compiler/ruby.css" rel="stylesheet"></head><body><div style="display: block; "><div class="page-header"><h1>%s</h2><!--CONTENT-->%s</div></div></body></html>'
+            html_page = '<!DOCTYPE html><html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="chrome=1"><title>SublimePeek | Help for %s</title><link href="css/ruby.css" rel="stylesheet"></head><body><div style="display: block; "><div class="page-header"><h1>%s</h2><!--CONTENT-->%s</div></div></body></html>'
             html_page = html_page.replace("10%", "10%%")
             f = open(self.path + "ruby.html", "w")
             f.write(html_page % (keyword, keyword, content))
@@ -408,7 +408,7 @@ class GetHelpFiles(threading.Thread):
 
             # copy style files
             os.makedirs(self.path + 'css')
-            distutils.dir_util.copy_tree(sublime.packages_path() + "/SublimePeek/help-compiler/DocHub-css", self.path + 'css')
+            distutils.dir_util.copy_tree(sublime.packages_path() + "/SublimePeek/css/DocHub", self.path + 'css')
 
             # get list of keywords
             ids = [item['title'] for item in data]

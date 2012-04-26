@@ -161,7 +161,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
                     output = subprocess.Popen(' '.join(args), stdout=subprocess.PIPE, shell=True).communicate()[0]
                     # save selected help files
                     if self.lang == 'Ruby':
-                        write_ruby_file(keyword, output)
+                        write_html_file('ruby', keyword, output, 'ruby')
                         keyword = 'ruby'
                     # show help file
                     self.show_help(keyword)
@@ -169,10 +169,10 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
             # show quick panel for selection of help file
             self.view.window().show_quick_panel(keywords, callback)
 
-        def write_ruby_file(keyword, content):
-            html_page = '<!DOCTYPE html><html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="chrome=1"><title>SublimePeek | Help for %s</title><link href="css/ruby.css" rel="stylesheet"></head><body><div style="display: block; "><div class="page-header"><h1>%s</h2><!--CONTENT-->%s</div></div></body></html>'
-            f = open(self.path + "ruby.html", "w")
-            f.write(html_page % (keyword, keyword, content))
+        def write_html_file(filename, keyword, content, lang):
+            html_page = '<!DOCTYPE html><html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="chrome=1"><title>SublimePeek | Help for %s</title><link href="css/%s.css" rel="stylesheet"></head><body><div style="display: block; "><div class="page-header"><h1>%s</h2><!--CONTENT-->%s</div></div></body></html>'
+            f = open(self.path + filename + ".html", "w")
+            f.write(html_page % (keyword, lang, keyword, content))
             f.close()
 
         # generate python help file
@@ -182,12 +182,21 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
             # call pydoc to generate help file in html
             args = calls[self.lang] + [keyword]
             # overview topics: help('keywords'), help('modules'), help('topics')
-            # output = subprocess.Popen(args, stdout=subprocess.PIPE).communicate()[0]
-            # if 'no Python documentation found for' in output:
-            #     select_keyword(['EXPRESSIONS', 'FORMATTING', 'TUPLELITERALS'])
-            #     return False
-            p = subprocess.Popen(args)
-            p.wait()
+            output = subprocess.Popen(args, stdout=subprocess.PIPE).communicate()[0]
+            # p = subprocess.Popen(args)
+            # p.wait()
+
+            # try to call pydoc again without '-w' argument
+            # python bug: http://stackoverflow.com/a/10333615/1318686
+            if 'no Python documentation found for' in output:
+                output = subprocess.Popen(['pydoc', keyword], stdout=subprocess.PIPE).communicate()[0]
+                # exit if no help found
+                if 'no Python documentation found for' in output:
+                    return keyword
+                # write html file
+                output = output.replace('\n', '<br>').replace(' ', '&nbsp;')
+                write_html_file(keyword, keyword, output, 'python')
+
             return keyword
 
         # generate rubin help file
@@ -210,7 +219,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
             # save file if only one match
             else:
                 # save selected help files
-                write_ruby_file(keyword, output)
+                write_html_file('ruby', keyword, output, 'ruby')
                 keyword = "ruby"
                 return keyword
 

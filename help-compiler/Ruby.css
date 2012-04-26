@@ -16,3 +16,9 @@ h2, h3 {
 h4, h6 {
 	font-style: italic;
 }
+
+pre {
+  font-family: "Monaco","Courier","Verdana", sans-serif;
+  background: #F7F7F7;
+  padding: 0.5em 0;
+}

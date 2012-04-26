@@ -183,6 +183,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
             os.chdir(self.path)
             # call pydoc to generate help file in html
             args = calls[self.lang] + [keyword]
+            # overview topics: help('keywords'), help('modules'), help('topics')
             # output = subprocess.Popen(args, stdout=subprocess.PIPE).communicate()[0]
             # if 'no Python documentation found for' in output:
             #     select_keyword(['EXPRESSIONS', 'FORMATTING', 'TUPLELITERALS'])

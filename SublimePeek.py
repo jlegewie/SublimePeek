@@ -145,39 +145,56 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         # set path for help file
         self.path = sublime.packages_path() + "/SublimePeek/"
 
+        # define arguments for subprocess call
+        calls = {
+            'Python': ['pydoc', '-w'],
+            'Ruby': ['ri', '--format', 'html']
+        }
+
+        # select help file to create
+        def select_keyword(keywords):
+            def callback(index):
+                if index != -1:
+                    keyword = keywords[index]
+                    # get selected help file
+                    args = calls[self.lang] + [keyword]
+                    output = subprocess.Popen(args, stdout=subprocess.PIPE).communicate()[0]
+                    print args
+                    # save selected help files
+                    if self.lang == 'Ruby':
+                        write_ruby_file(keyword, output)
+                        keyword = 'ruby'
+                    # show help file
+                    self.show_help(keyword)
+
+            # show quick panel for selection of help file
+            self.view.window().show_quick_panel(keywords, callback)
+
+        def write_ruby_file(keyword, content):
+            html_page = '<!DOCTYPE html><html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="chrome=1"><title>SublimePeek | Help for %s</title><link href="help-compiler/ruby.css" rel="stylesheet"><style type="text/css">  body {  padding-top: 10px;  padding-bottom: 20px;  padding-left: 10%;  padding-right: 10%;  }  .sidebar-nav {  padding: 9px 0;  }</style></head><body><div style="display: block; "><div class="page-header"><h1>%s</h2><!--CONTENT-->%s</div></div></body></html>'
+            html_page = html_page.replace("10%", "10%%")
+            f = open(self.path + "ruby.html", "w")
+            f.write(html_page % (keyword, keyword, content))
+            f.close()
+
         # generate python help file
         if self.lang == "Python":
             # set working dir
             os.chdir(self.path)
             # call pydoc to generate help file in html
-            args = ['pydoc', '-w', keyword]
+            args = calls[self.lang] + [keyword]
+            # output = subprocess.Popen(args, stdout=subprocess.PIPE).communicate()[0]
+            # if 'no Python documentation found for' in output:
+            #     select_keyword(['EXPRESSIONS', 'FORMATTING', 'TUPLELITERALS'])
+            #     return False
             p = subprocess.Popen(args)
             p.wait()
             return keyword
 
         # generate rubin help file
         if self.lang == "Ruby":
-            def write_ruby_file(keyword, content):
-                html_page = '<!DOCTYPE html><html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="chrome=1"><title>SublimePeek | Help for %s</title><link href="help-compiler/ruby.css" rel="stylesheet"><style type="text/css">  body {  padding-top: 10px;  padding-bottom: 20px;  padding-left: 10%;  padding-right: 10%;  }  .sidebar-nav {  padding: 9px 0;  }</style></head><body><div style="display: block; "><div class="page-header"><h1>%s</h2><!--CONTENT-->%s</div></div></body></html>'
-                html_page = html_page.replace("10%", "10%%")
-                f = open(self.path + "ruby.html", "w")
-                f.write(html_page % (keyword, keyword, content))
-                f.close()
-
-            def on_done(index):
-                if index != -1:
-                    keyword = keywords[index]
-                    # get selected help file
-                    args = ['ri', '--format', 'html', keyword]
-                    output = subprocess.Popen(args, stdout=subprocess.PIPE).communicate()[0]
-                    # save selected help files
-                    write_ruby_file(keyword, output)
-                    # show help file
-                    self.show_help("ruby")
-
             # get help for keyword
-            args = ['ri', '--format', 'html', keyword]
-            # '--format html'
+            args = calls[self.lang] + [keyword]
             output = subprocess.Popen(args, stdout=subprocess.PIPE).communicate()[0]
             # more than one match for keyword
             if "More than one method matched your request." in output:
@@ -185,8 +202,9 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
                 keywords = output.split("mationononeof:")[1].split(",")
 
                 # show quick panel for selection of help file
-                self.view.window().show_quick_panel(keywords, on_done)
+                select_keyword(keywords)
                 return False
+
             # save file if only one match
             else:
                 # save selected help files

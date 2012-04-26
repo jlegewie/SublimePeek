@@ -196,6 +196,9 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
             # get help for keyword
             args = calls[self.lang] + [keyword]
             output = subprocess.Popen(args, stdout=subprocess.PIPE).communicate()[0]
+            # exit if no help found
+            if output == '':
+                return keyword
             # more than one match for keyword
             if "More than one method matched your request." in output:
                 output = output.replace("\n", "").replace(" ", "")

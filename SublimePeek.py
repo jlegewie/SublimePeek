@@ -158,7 +158,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
                     keyword = keywords[index]
                     # get selected help file
                     args = calls[self.lang] + [keyword]
-                    output = subprocess.Popen(' '.join(args), stdout=subprocess.PIPE, shell=True).communicate()[0]
+                    output = subprocess.Popen(args, stdout=subprocess.PIPE).communicate()[0]
                     # save selected help files
                     if self.lang == 'Ruby':
                         write_html_file('ruby', keyword, output, 'ruby')
@@ -203,7 +203,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         if self.lang == "Ruby":
             # get help for keyword
             args = calls[self.lang] + [keyword]
-            output = subprocess.Popen(' '.join(args), stdout=subprocess.PIPE, shell=True).communicate()[0]
+            output = subprocess.Popen(args, stdout=subprocess.PIPE).communicate()[0]
             # exit if no help found
             if output == '':
                 return keyword

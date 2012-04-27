@@ -1,4 +1,10 @@
-SublimePeek 2012.04.27 changelog
+SublimePeek
+===========
+
+SublimePeek provides quick access to documentation by opening help files in Quick Look. The plugin supports HTML, CSS, JavaScript, PHP, Python, Ruby, R, and Stata. Support for other languages can be added easily.
+
+
+CHANGELOG 2012.04.27
 
 - Added support for JavaScript, PHP, Ruby, and Stata
 - Improved Python support

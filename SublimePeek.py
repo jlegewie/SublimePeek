@@ -337,10 +337,12 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
     # the threading code was adopted from
     # http://net.tutsplus.com/tutorials/python-tutorials/how-to-create-a-sublime-text-2-plugin/
     def get_help_files(self):
-        # prompt user
-        if not sublime.ok_cancel_dialog("SublimePeek\nDo you want to download and compile the help files for '%s'?" % (self.lang)):
-            sublime.status_message("SublimePeek: Help files for '%s' are not installed." % (self.lang))
-            return
+        # prompt user (only for version >= 2187)
+        # (sublime.ok_cancel_dialog was added in nightly 2187)
+        if sublime.version() >= 2187:
+            if not sublime.ok_cancel_dialog("SublimePeek\nDo you want to download and compile the help files for '%s'?" % (self.lang)):
+                sublime.status_message("SublimePeek: Help files for '%s' are not installed." % (self.lang))
+                return
         # start download thread
         threads = []
         thread = GetHelpFiles(self.lang, self.path, 5)

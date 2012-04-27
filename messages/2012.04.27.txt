@@ -1,0 +1,8 @@
+SublimePeek 2012.04.27 changelog
+
+- Added support for JavaScript, PHP, Ruby, and Stata
+- Improved Python support
+- Overview of all available help topics based on the familiar ST2 quick select panel 
+  (the same as the command panel, or the one for jumping from project to project)
+- Help files are now downloaded and compiled in the background
+- Bug fixes 

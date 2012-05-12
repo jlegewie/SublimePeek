@@ -120,6 +120,10 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
 
     # call quick look to show help file
     def show_help(self, keyword):
+        """
+        display help file using quicklook (qlmanage) on mac ox, gloobus on linux, and maComfort on Windows
+        """
+
         sublime.status_message("SublimePeek: " + keyword)
         # set filepath of help file
         self.filepath = self.path + "%s.html" % (keyword)
@@ -142,6 +146,10 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
                 sublime.status_message("SublimePeek: No help file found for '" + keyword + "'.")
 
     def create_help_file(self, keyword):
+        """
+        create help file in python, called when accessor == "python"
+        @keyword: the keyword for which to create help
+        """
         # set path for help file
         self.path = sublime.packages_path() + "/SublimePeek/"
 

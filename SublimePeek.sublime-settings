@@ -1,4 +1,11 @@
 {
+	/* show overview of all available help files if no help file found */
 	"overview":true,
+	/* define custom  executable for display of help files
+	   Example (default for Max OS):
+	   ['/usr/bin/qlmanage', '-p'] 
+	   Example (default for Linux):
+	   ['/usr/bin/gloobus-preview'] 
+	*/
 	"custom_executable":[]
 }

@@ -146,6 +146,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
 
             # set executable for Windows
             if sublime.platform() == "windows":
+                # http://rafaelklaus.com/macomfort/
                 executable = ['C:\\Program Files\\maComfort\\maComfort.exe', '-ql']
                 if not os.path.isfile(executable[0]):
                     executable = ['C:\\Program Files (x86)\\maComfort\\maComfort.exe', '-ql']

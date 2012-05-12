@@ -146,9 +146,9 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
 
             # set executable for Windows
             if sublime.platform() == "windows":
-                executable = ['C:\\Program Files\\maComfort\\maComfort.exe']
+                executable = ['C:\\Program Files\\maComfort\\maComfort.exe', '-ql']
                 if not os.path.isfile(executable[0]):
-                    executable = ['C:\\Program Files (x86)\\maComfort\\maComfort.exe']
+                    executable = ['C:\\Program Files (x86)\\maComfort\\maComfort.exe', '-ql']
                 error_mess = "maComfort is missing. Please install verion 1.5 or later (if installed, you might have to set 'custom_executable')."
                 # change seperator for Windows
                 self.filepath = self.filepath.replace('/', '\\')

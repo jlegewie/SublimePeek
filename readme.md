@@ -1,11 +1,10 @@
-## SublimePeek
+# SublimePeek
 SublimePeek provides quick access to documentation by opening help files in Quick Look. The plugin supports _HTML_, _CSS_, _JavaScript_, _PHP_, _Python_, _Ruby_, _R_, and _Stata_. Support for other languages can be added easily.
-Currently, the plugin only runs on Mac OS but it can be extended to work on other unix systems using gloobus-preview as well as Windows using maComfort.
 
 **Supported Languages:** HTML, CSS, JavaScript, PHP, Python, Ruby, R, and Stata
 
 ## Installation
-(instructions copied and modified from https://github.com/Kronuz/SublimeLinter)
+(instructions based on https://github.com/Kronuz/SublimeLinter and ZoteroQuickLook)
 
 
 **With the Package Control plugin:** The easiest way to install SublimePeek is through Package Control. Instructions to install Package Control can be found here: http://wbond.net/sublime_packages/package_control/installation
@@ -23,6 +22,25 @@ The "Packages" directory is located at:
 * Linux: `~/.config/sublime-text-2/Packages/`
 * Windows: `%APPDATA%/Sublime Text 2/Packages/`
 
+## Required Software on Linux and Windows
+On OS X the plugin uses native Quick Look feature through qlmanage command so that no additional software or configuration is required. On Linux and Windows, you need to install additional software.
+
+### Linux
+Note: Linux support is preliminary and untested. Please let me know if it works or if it doesn't!!
+
+On Linux the user must install Gloobus, which is a preview software. On Ubuntu you can do this by running the following commands in terminal:  
+
+    sudo add-apt-repository ppa:gloobus-dev/gloobus-preview 
+    sudo apt-get update 
+    sudo apt-get upgrade 
+    sudo apt-get install gloobus-preview
+
+For other distributions and versions the installation might be different.
+
+### Windows
+On Windows you must install [maComfort](http://rafaelklaus.com/macomfort/) version 1.5 or later. If maComfort is not installed in `C:\Program Files\maComfort\` or `C:\Program Files (x86)\maComfort\`, you have to set the option `custom_executable` to the correct location. The option should take this form (just replace the first element in the list): `["C:\\Program Files\\maComfort\\maComfort.exe", "-ql"]`
+
+## Support for Different Languages
 
 ### Python and Ruby
 The python help files are generated on the fly using `pydoc` for Python and `ri` for Ruby so that both languages should work right away.
@@ -41,9 +59,6 @@ Just select a function, and press `super+shift+h`. If the language is supported 
 
 ### Overview of Help Files
 For all languages except Python and Ruby, SublimePeek can show an overview of all available help topics based on the familiar ST2 quick select panel (the same as the command panel, or the one for jumping from project to project). SublimePeek shows the overview, if no matching help file is found for the current selection. To bring up the overview directly, just make sure that your current selection is not meaningful and you can quickly browse all help topics.
-
-## Support for Unix and Windows
-Currently, the plugin only runs on Mac OS but it can be extended to work on other unix systems using gloobus-preview as well as Windows using maComfort. I personally don't have a unix or windows system but it should be pretty easy to add support. Drop me a line and we can make it work!
 
 ## Support for other Languages
 Adding support for other languages is easy. You either need help files that are called like the respective function (i.e. one help file for each function) or help files that are linked to the function name with a simple json database. For R, I generated these help files with a short script that iterates through all objects in all installed packages and extracts the help file for each function (see the R-help.r file in the help-compiler folder). These files should be in a format that is supported by Quick Look (Mac), gloobus-preview (Linux), and maComfort (Windows) such as html or simple text files. I am happy to provide more information when someone wants to add support for other languages. 

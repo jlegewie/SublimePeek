@@ -135,17 +135,17 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
             # set executable based on system (or use custom executable)
             if sublime.platform() == "osx":
                 executable = ['/usr/bin/qlmanage', '-p']
-                error_mess = "I don't know why... :("
+                error_mess = "qlmanage is missing. I don't know why... :("
                 # qlmanage documentation list
                 # http://developer.apple.com/library/mac/#documentation/Darwin/Reference/ManPages/man1/qlmanage.1.html
 
             if sublime.platform() == "linux":
                 executable = ['/usr/bin/gloobus-preview']
-                error_mess = "Please install Gloobus."
+                error_mess = "'/usr/bin/gloobus-preview' is missing. Please install Gloobus."
 
             if len(settings.get("custom_executable")) > 0:
                 executable = settings.get("custom_executable")
-                error_mess = "Please set 'custom_executable' to a correct executable."
+                error_mess = "'" + executable[0] + "' is missing. Please set 'custom_executable' to a correct executable."
 
             # check whether executable exists
             if os.path.isfile(executable[0]):
@@ -153,7 +153,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
                 args = executable + [self.filepath]
                 self.popenAndCall(args, self.postPeek)
             else:
-                sublime.status_message("SublimePeek: '" + executable[0] + "' is missing. " + error_mess)
+                sublime.status_message("SublimePeek: " + error_mess)
                 self.postPeek()
 
         # if no file found, show overview

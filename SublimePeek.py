@@ -144,6 +144,15 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
                 executable = ['/usr/bin/gloobus-preview']
                 error_mess = "'/usr/bin/gloobus-preview' is missing. Please install Gloobus."
 
+            # set executable for Windows
+            if sublime.platform() == "windows":
+                executable = ['C:\\Program Files\\maComfort\\maComfort.exe']
+                if not os.path.isfile(executable[0]):
+                    executable = ['C:\\Program Files (x86)\\maComfort\\maComfort.exe']
+                error_mess = "maComfort is missing. Please install verion 1.5 or later (if installed, you might have to set 'custom_executable')."
+                # change seperator for Windows
+                self.filepath = self.filepath.replace('/', '\\')
+
             # use custum executable
             if len(settings.get("custom_executable")) > 0:
                 executable = settings.get("custom_executable")

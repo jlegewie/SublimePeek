@@ -224,6 +224,9 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
                 return keyword
 
     def get_language(self):
+        """
+        get the language of the current file using syntax definition; also looks for embedded PHP, js and css in HTML files.
+        """
         # get language file
         lang_file = self.view.settings().get('syntax')
         lang = lang_file.split('/')
@@ -241,6 +244,9 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         return lang
 
     def get_keyword(self):
+        """
+        get keyword by either taking the selection or by looking right and left from the cursor position
+        """
         # get selection
         s = self.view.sel()[0]
         pos = s.b
@@ -260,6 +266,11 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
 
     # use ST2 show_quick_panel to let the user select a help files from a list of functions (e.g. methods for different classes such as String.length and Array.length)
     def select_help_file(self, options, description):
+        """
+        open dialog that allows users to select keyword from ST2 quick panel
+        @options: list of options in the quick panel
+        @description: list of description for each option; only used if len(options)==len(description)
+        """
         def on_done(index):
             if index != -1:
                 self.show_help(options[index])

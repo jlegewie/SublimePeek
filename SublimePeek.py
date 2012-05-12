@@ -124,7 +124,6 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         display help file using quicklook (qlmanage) on mac ox, gloobus on linux, and maComfort on Windows
         """
 
-        sublime.status_message("SublimePeek: " + keyword)
         # set filepath of help file
         self.filepath = self.path + "%s.html" % (keyword)
 

@@ -132,17 +132,19 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
             # show status message
             sublime.status_message("SublimePeek: Help for '" + keyword + "'")
 
-            # set executable based on system (or use custom executable)
+            # set executable for Mac OS X
             if sublime.platform() == "osx":
                 executable = ['/usr/bin/qlmanage', '-p']
                 error_mess = "qlmanage is missing. I don't know why... :("
                 # qlmanage documentation list
                 # http://developer.apple.com/library/mac/#documentation/Darwin/Reference/ManPages/man1/qlmanage.1.html
 
+            # set executable for Linux
             if sublime.platform() == "linux":
                 executable = ['/usr/bin/gloobus-preview']
                 error_mess = "'/usr/bin/gloobus-preview' is missing. Please install Gloobus."
 
+            # use custum executable
             if len(settings.get("custom_executable")) > 0:
                 executable = settings.get("custom_executable")
                 error_mess = "'" + executable[0] + "' is missing. Please set 'custom_executable' to a correct executable."

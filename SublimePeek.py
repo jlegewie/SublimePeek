@@ -127,15 +127,26 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         # set filepath of help file
         self.filepath = self.path + "%s.html" % (keyword)
 
-        # quick look
+        # check whether help file exists
         if os.path.isfile(self.filepath):
+            # show status message
             sublime.status_message("SublimePeek: Help for '" + keyword + "'")
-            args = ['/usr/bin/qlmanage', '-p', self.filepath]
-            # qlmanage documentation list
-            # http://developer.apple.com/library/mac/#documentation/Darwin/Reference/ManPages/man1/qlmanage.1.html
-            self.popenAndCall(args, self.postPeek)
-            #p = subprocess.Popen(args)
-            #p.wait()
+            # set executable based on system
+            if sublime.platform() == "osx":
+                executable = ['/usr/bin/qlmanage', '-p']
+                # qlmanage documentation list
+                # http://developer.apple.com/library/mac/#documentation/Darwin/Reference/ManPages/man1/qlmanage.1.html
+            if sublime.platform() == "linux":
+                executable = ['/usr/bin/gloobus-preview']
+
+            # check whether executable exists
+            if os.path.isfile(executable[0]):
+                # call executable to display help file
+                args = executable + [self.filepath]
+                self.popenAndCall(args, self.postPeek)
+            else:
+                sublime.status_message("SublimePeek: '" + executable[0] + "' is missing. Please install it.")
+
         # if no file found, show overview
         else:
             if settings.get("overview") and self.accessor == "identity":

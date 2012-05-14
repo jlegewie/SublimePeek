@@ -23,6 +23,9 @@ import distutils.dir_util
 
 ## load settings
 settings = sublime.load_settings(u'SublimePeek.sublime-settings')
+sep_char = '/'
+if sublime.platform() == "windows":
+    sep_char = '\\'
 
 
 class SublimePeekCommand(sublime_plugin.TextCommand):
@@ -47,7 +50,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         self.accessor = self.accessors[self.languages.index(self.lang)]
 
         # path for help files
-        self.path = sublime.packages_path() + "/SublimePeek-%s-help/" % (self.lang)
+        self.path = sublime.packages_path() + sep_char + "SublimePeek-%s-help%s" % (self.lang, sep_char)
         # check whether help files exists unless generated on the fly ("accessor" == "python")
         if not self.accessor == "python":
             if not os.path.exists(self.path):
@@ -67,7 +70,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         # use mapping to get correct keyword
         if self.accessor == "mapping":
             # load mapping file
-            map = json.load(open(self.path + '/%s-mapping.json' % (self.lang), "r"))
+            map = json.load(open(self.path + '%s%s-mapping.json' % (sep_char, self.lang), "r"))
             map_from = [item['from'] for item in map]
 
             # get keyword from map
@@ -158,7 +161,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
                 #     executable = ['C:\\Program Files (x86)\\maComfort\\maComfort.exe', '-ql']
                 # error_mess = "maComfort is missing. Please install verion 1.5 or later (if installed, you might have to set 'custom_executable')."
                 # change seperator for Windows
-                self.filepath = self.filepath.replace('/', '\\')
+                # self.filepath = self.filepath.replace('/', '\\')
 
             # use custum executable
             if settings.get("custom_executable"):
@@ -194,7 +197,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         @keyword: the keyword for which to create help
         """
         # set path for help file
-        self.path = sublime.packages_path() + "/SublimePeek/"
+        self.path = sublime.packages_path() + "%sSublimePeek%s" % (sep_char, sep_char)
 
         # define arguments for subprocess call
         calls = {
@@ -280,7 +283,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         """
         # get language file
         lang_file = self.view.settings().get('syntax')
-        lang = lang_file.split('/')
+        lang = lang_file.split(sep_char)
         lang = lang[len(lang) - 1].split('.')[0]
         # get scope for embedded PHP, JS, or CSS
         if lang == "HTML":
@@ -480,7 +483,8 @@ class GetHelpFiles(threading.Thread):
 
             # copy style files
             os.makedirs(self.path + 'css')
-            distutils.dir_util.copy_tree(sublime.packages_path() + "/SublimePeek/css/DocHub", self.path + 'css')
+            location = sublime.packages_path() + "%sSublimePeek%scss%sDocHub" % (sep_char, sep_char, sep_char)
+            distutils.dir_util.copy_tree(location, self.path + 'css')
 
             # get list of keywords
             ids = [item['title'] for item in data]

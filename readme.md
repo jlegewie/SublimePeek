@@ -22,8 +22,9 @@ The "Packages" directory is located at:
 * Linux: `~/.config/sublime-text-2/Packages/`
 * Windows: `%APPDATA%/Sublime Text 2/Packages/`
 
-## Required Software on Linux and Windows
-On OS X the plugin uses native Quick Look feature through qlmanage command so that no additional software or configuration is required. On Linux and Windows, you need to install additional software.
+## Additional Steps (optional on Mac OS X and Windows, required on Linux)
+On OS X the plugin uses native Quick Look feature through qlmanage command so that no additional software or configuration is required. On Windows the plugin opens the help file in the default browser but you can change to other applications such as maComfort. On Linux you need to install additional software.
+ 
 
 ### Linux
 Note: Linux support is preliminary and untested. Please let me know if it works or if it doesn't!!
@@ -38,7 +39,7 @@ On Linux the user must install Gloobus, which is a preview software. On Ubuntu y
 For other distributions and versions the installation might be different.
 
 ### Windows
-On Windows you must install [maComfort](http://rafaelklaus.com/macomfort/) version 1.5 or later. If maComfort is not installed in `C:\Program Files\maComfort\` or `C:\Program Files (x86)\maComfort\`, you have to set the option `custom_executable` to the correct location. The option should take this form (just replace the first element in the list): `["C:\\Program Files\\maComfort\\maComfort.exe", "-ql"]`
+On Windows the plugin opens the help file in the default browser but you can change to other applications such as maComfort. To use maComfort, install the software from [here](http://rafaelklaus.com/macomfort/) (version 1.5 or later). After installing maComfort, you have to set the option `custom_executable` to the correct location. The option should take this form (just replace the first element in the list): `["C:\\Program Files\\maComfort\\maComfort.exe", "-ql"]`
 
 ## Support for Different Languages
 

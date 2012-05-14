@@ -6,8 +6,11 @@
 	   ["/usr/bin/qlmanage", "-p"]
 	   Example (default for Linux):
 	   ["/usr/bin/gloobus-preview"]
-	   Example (default for Windows):
+	   On Windows, SublimePeek opens the help file in the default browser.
+	   Alternatively, you can set an application here such as maComfort
 	   ["C:\\Program Files\\maComfort\\maComfort.exe", "-ql"]
+	   or
+	   ['C:\\Program Files (x86)\\maComfort\\maComfort.exe', '-ql']
 	*/
 	"custom_executable":[]
 }

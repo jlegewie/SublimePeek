@@ -17,6 +17,10 @@ import distutils.dir_util
 ## linux - gloobus-preview
 # /usr/bin/gloobus-preview [FILEPATH]
 
+## windows - os.startfile or maComfort
+# os.startfile(r'c:\some\path\to\my.html')
+# C:\Program Files\maComfort\maComfort.exe -ql [FILEPATH]
+
 ## load settings
 settings = sublime.load_settings(u'SublimePeek.sublime-settings')
 
@@ -146,27 +150,31 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
 
             # set executable for Windows
             if sublime.platform() == "windows":
-                # http://rafaelklaus.com/macomfort/
-                executable = ['C:\\Program Files\\maComfort\\maComfort.exe', '-ql']
-                if not os.path.isfile(executable[0]):
-                    executable = ['C:\\Program Files (x86)\\maComfort\\maComfort.exe', '-ql']
-                error_mess = "maComfort is missing. Please install verion 1.5 or later (if installed, you might have to set 'custom_executable')."
+                # direct call of file
+                # alternative: maComfort (http://rafaelklaus.com/macomfort/)
+                executable = []
+                # executable = ['C:\\Program Files\\maComfort\\maComfort.exe', '-ql']
+                # if not os.path.isfile(executable[0]):
+                #     executable = ['C:\\Program Files (x86)\\maComfort\\maComfort.exe', '-ql']
+                # error_mess = "maComfort is missing. Please install verion 1.5 or later (if installed, you might have to set 'custom_executable')."
                 # change seperator for Windows
                 self.filepath = self.filepath.replace('/', '\\')
 
             # use custum executable
-            if len(settings.get("custom_executable")) > 0:
+            if settings.get("custom_executable"):
                 executable = settings.get("custom_executable")
                 error_mess = "'" + executable[0] + "' is missing. Please set 'custom_executable' to a correct executable."
 
             # check whether executable exists
-            if os.path.isfile(executable[0]):
-                # call executable to display help file
-                args = executable + [self.filepath]
-                self.popenAndCall(args, self.postPeek)
-            else:
-                sublime.status_message("SublimePeek: " + error_mess)
-                self.postPeek()
+            if executable:
+                if not os.path.isfile(executable[0]):
+                    sublime.status_message("SublimePeek: " + error_mess)
+                    self.postPeek()
+                    return
+
+            # call executable to display help file
+            args = executable + [self.filepath]
+            self.popenAndCall(args, self.postPeek)
 
         # if no file found, show overview
         else:

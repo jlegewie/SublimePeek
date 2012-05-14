@@ -61,5 +61,27 @@ Just select a function, and press `super+shift+h`. If the language is supported 
 For all languages except Python and Ruby, SublimePeek can show an overview of all available help topics based on the familiar ST2 quick select panel (the same as the command panel, or the one for jumping from project to project). SublimePeek shows the overview, if no matching help file is found for the current selection. To bring up the overview directly, just make sure that your current selection is not meaningful and you can quickly browse all help topics.
 
 ## Support for other Languages
-Adding support for other languages is easy. You either need help files that are called like the respective function (i.e. one help file for each function) or help files that are linked to the function name with a simple json database. For R, I generated these help files with a short script that iterates through all objects in all installed packages and extracts the help file for each function (see the R-help.r file in the help-compiler folder). These files should be in a format that is supported by Quick Look (Mac), gloobus-preview (Linux), and maComfort (Windows) such as html or simple text files. I am happy to provide more information when someone wants to add support for other languages. 
- 
+Adding support for other languages is relative easy. The key is a collection of help files for each function, tag etc. that are either named like the respective function (i.e. one help file for each function) or linked to the function name with a simple json database (e.g. in javascript, `length` is mapped to `Array.length`, `Function.length`, and `String.length`). The mapping file is called `[LANG]-mapping.json` and follows this structure
+
+    [
+      {
+          "from": "NaN",
+          "to": ["NaN","Number.NaN"]
+      },
+      {
+          "from": "while",
+          "to": ["do...while","while"]
+      },
+      {
+          "from": "else",
+          "to": "if...else"
+      }
+    ]
+
+When multiple help files are linked to one keyword (such as for `NaN` or `while`), the user can select between the different alternatives. Note that the mapping file can omit keywords with direct mapping.
+
+For R, I generated these help files with a short script that iterates through all objects in all installed packages and extracts the help file for each function (see the R-help.r file in the help-compiler folder). For HTML, CSS, JavaScript, and PHP, I generate the help files from DocHub using Python (see the `GetHelpFiles` class in `SublimePeek.py`).
+
+I third alternative is to generate help files on the fly in Python. Currently, the help for Python and Rubin are create like that using the command line utilities `pydoc` and `ri` (see `create_help_file` function in `SublimePeek.py`).
+
+If you want to add support for other languages, I am happy to provide further details and make the necessary adjustments to SublimePeek as long as you provide the actual help files with the mapping file.

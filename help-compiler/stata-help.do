@@ -1,3 +1,4 @@
+* PROBLEM: rename group, matrix utilities
 
 * set st2 packages location
 global st2 "~/Library/Application Support/Sublime Text 2/Packages"

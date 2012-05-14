@@ -125,7 +125,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
     # call quick look to show help file
     def show_help(self, keyword):
         """
-        display help file using quicklook (qlmanage) on mac ox, gloobus on linux, and maComfort on Windows
+        display help file using quicklook (qlmanage) on mac ox, gloobus on linux, and os.startfile (or maComfort) on Windows
         """
 
         # set filepath of help file
@@ -173,8 +173,12 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
                     return
 
             # call executable to display help file
-            args = executable + [self.filepath]
-            self.popenAndCall(args, self.postPeek)
+            if executable:
+                args = executable + [self.filepath]
+                self.popenAndCall(args, self.postPeek)
+            else:
+                if sublime.platform() == "windows":
+                    os.startfile(repr(self.filepath))
 
         # if no file found, show overview
         else:

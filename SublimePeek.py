@@ -178,7 +178,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
                 self.popenAndCall(args, self.postPeek)
             else:
                 if sublime.platform() == "windows":
-                    os.startfile(repr(self.filepath))
+                    os.startfile(self.filepath)
 
         # if no file found, show overview
         else:

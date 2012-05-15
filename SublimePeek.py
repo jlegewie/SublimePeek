@@ -280,8 +280,8 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         """
         # get language file
         lang_file = self.view.settings().get('syntax')
-        lang = lang_file.split(os.sep)
-        lang = lang[len(lang) - 1].split('.')[0]
+        _, fname = os.path.split(lang_file)
+        lang, _ = os.path.splitext(fname)
         # get scope for embedded PHP, JS, or CSS
         if lang == "HTML":
             scope = self.view.syntax_name(self.view.sel()[0].b)

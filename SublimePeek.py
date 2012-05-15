@@ -9,7 +9,7 @@ import re
 import os
 import json
 import urllib2
-import distutils.dir_util
+import shutil
 
 ## mac os - quicklook
 # /usr/bin/qlmanage -p [FILEPATH]
@@ -479,9 +479,9 @@ class GetHelpFiles(threading.Thread):
                 os.makedirs(self.path)
 
             # copy style files
-            os.makedirs(self.path + 'css')
             location = os.path.join(sublime.packages_path(), "SublimePeek", "css", "DocHub")
-            distutils.dir_util.copy_tree(location, os.path.join(self.path, 'css'))
+            shutil.copytree(location, os.path.join(self.path, 'css'))
+            # distutils.dir_util.copy_tree
 
             # get list of keywords
             ids = [item['title'] for item in data]

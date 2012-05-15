@@ -18,9 +18,15 @@
 	"custom_executable":[],
 
 	/* 
-	Define arguments for pydoc call (default: ["pydoc", "-w"])
+	Python Help: Define arguments for pydoc call (default: ["pydoc", "-w"])
 		On Windows this should be changed to something like this:
 		["python", r"c:\Python32\Lib\pydoc.py", "-w"]
 	*/
-	"pydoc_call":["pydoc", "-w"]
+	"pydoc_call":["pydoc", "-w"],
+
+	/* 
+	Ruby Help: Define arguments for ri call (default: ['ri', '--format', 'html', '--system', '--gems'])
+		On Windows this should be changed but I am not sure about the correct setting.
+	*/
+	"ri_call":["ri", "--format", "html", "--system", "--gems"]
 }

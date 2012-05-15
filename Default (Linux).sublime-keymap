@@ -1,0 +1,3 @@
+[
+    { "keys": ["alt+shift+h"], "command": "sublime_peek" }
+]

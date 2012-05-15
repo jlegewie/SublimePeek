@@ -198,7 +198,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
 
         # define arguments for subprocess call
         calls = {
-            'Python': ['pydoc', '-w'],
+            'Python': settings.get("pydoc_call"),
             'Ruby': ['ri', '--format', 'html', '--system', '--gems']
         }
 

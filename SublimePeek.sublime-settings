@@ -1,7 +1,10 @@
 {
 	/* show overview of all available help files if no help file found */
 	"overview":true,
-	/* define custom  executable for display of help files
+
+	/*
+	Define custom  executable for display of help files
+
 	   Example (default for Max OS):
 	   ["/usr/bin/qlmanage", "-p"]
 	   Example (default for Linux):
@@ -12,5 +15,12 @@
 	   or
 	   ['C:\\Program Files (x86)\\maComfort\\maComfort.exe', '-ql']
 	*/
-	"custom_executable":[]
+	"custom_executable":[],
+
+	/* 
+	Define arguments for pydoc call (default: ["pydoc", "-w"])
+		On Windows this should be changed to something like this:
+		["python", r"c:\Python32\Lib\pydoc.py", "-w"]
+	*/
+	"pydoc_call":["pydoc", "-w"]
 }

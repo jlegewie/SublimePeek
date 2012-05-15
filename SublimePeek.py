@@ -23,9 +23,6 @@ import distutils.dir_util
 
 ## load settings
 settings = sublime.load_settings(u'SublimePeek.sublime-settings')
-sep_char = '/'
-if sublime.platform() == "windows":
-    sep_char = '\\'
 
 
 class SublimePeekCommand(sublime_plugin.TextCommand):
@@ -50,7 +47,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         self.accessor = self.accessors[self.languages.index(self.lang)]
 
         # path for help files
-        self.path = sublime.packages_path() + sep_char + "SublimePeek-%s-help%s" % (self.lang, sep_char)
+        self.path = os.path.join(sublime.packages_path(), "SublimePeek-%s-help" % (self.lang))
         # check whether help files exists unless generated on the fly ("accessor" == "python")
         if not self.accessor == "python":
             if not os.path.exists(self.path):
@@ -70,7 +67,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         # use mapping to get correct keyword
         if self.accessor == "mapping":
             # load mapping file
-            map = json.load(open(self.path + '%s%s-mapping.json' % (sep_char, self.lang), "r"))
+            map = json.load(open(os.path.join(self.path, '%s-mapping.json' % (self.lang)), "r"))
             map_from = [item['from'] for item in map]
 
             # get keyword from map
@@ -80,7 +77,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
                 keyword = map[i]['to']
             # if keyword not in map, check wether file can be access directly and otherwise compile list for overview
             else:
-                if not os.path.isfile(self.path + "%s.html" % (keyword)):
+                if not os.path.isfile(os.path.join(self.path, "%s.html" % (keyword))):
                     if settings.get("overview"):
                         keyword = self.get_list_of_help_topics(map)
                     else:
@@ -132,7 +129,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         """
 
         # set filepath of help file
-        self.filepath = self.path + "%s.html" % (keyword)
+        self.filepath = os.path.join(self.path, "%s.html" % (keyword))
 
         # check whether help file exists
         if os.path.isfile(self.filepath):
@@ -197,7 +194,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         @keyword: the keyword for which to create help
         """
         # set path for help file
-        self.path = sublime.packages_path() + "%sSublimePeek%s" % (sep_char, sep_char)
+        self.path = os.path.join(sublime.packages_path(), "SublimePeek")
 
         # define arguments for subprocess call
         calls = {
@@ -225,7 +222,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
 
         def write_html_file(filename, keyword, content, lang):
             html_page = '<!DOCTYPE html><html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="chrome=1"><title>SublimePeek | Help for %s</title><link href="css/%s.css" rel="stylesheet"></head><body><div style="display: block; "><div class="page-header"><h1>%s</h2><!--CONTENT-->%s</div></div></body></html>'
-            f = open(self.path + filename + ".html", "w")
+            f = open(os.path.join(self.path, filename + ".html"), "w")
             f.write(html_page % (keyword, lang, keyword, content))
             f.close()
 
@@ -283,7 +280,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         """
         # get language file
         lang_file = self.view.settings().get('syntax')
-        lang = lang_file.split(sep_char)
+        lang = lang_file.split(os.sep)
         lang = lang[len(lang) - 1].split('.')[0]
         # get scope for embedded PHP, JS, or CSS
         if lang == "HTML":
@@ -483,8 +480,8 @@ class GetHelpFiles(threading.Thread):
 
             # copy style files
             os.makedirs(self.path + 'css')
-            location = sublime.packages_path() + "%sSublimePeek%scss%sDocHub" % (sep_char, sep_char, sep_char)
-            distutils.dir_util.copy_tree(location, self.path + 'css')
+            location = os.path.join(sublime.packages_path(), "SublimePeek", "css", "DocHub")
+            distutils.dir_util.copy_tree(location, os.path.join(self.path, 'css'))
 
             # get list of keywords
             ids = [item['title'] for item in data]
@@ -536,7 +533,7 @@ class GetHelpFiles(threading.Thread):
                     note_content = note
 
                 # write html file
-                f = open(self.path + id + ".html", "w")
+                f = open(os.path.join(self.path, id + ".html"), "w")
                 f.write((html_page % (id, id, html, note_content)).encode('utf-8'))
                 f.close()
 

@@ -220,35 +220,54 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
             # show quick panel for selection of help file
             self.view.window().show_quick_panel(keywords, callback)
 
-        def write_html_file(filename, keyword, content, lang):
+        def write_html_file(filename, keyword, content, style):
             html_page = '<!DOCTYPE html><html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="chrome=1"><title>SublimePeek | Help for %s</title><link href="css/%s.css" rel="stylesheet"></head><body><div style="display: block; "><div class="page-header"><h1>%s</h2><!--CONTENT-->%s</div></div></body></html>'
             f = open(os.path.join(self.path, filename + ".html"), "w")
-            f.write(html_page % (keyword, lang, keyword, content))
+            f.write(html_page % (keyword, style, keyword, content))
             f.close()
 
         # generate python help file
         if self.lang == "Python":
-            # set working dir
-            os.chdir(self.path)
-            # call pydoc to generate help file in html
-            args = calls[self.lang] + [keyword]
-            # overview topics: help('keywords'), help('modules'), help('topics')
-            output = subprocess.Popen(args, stdout=subprocess.PIPE).communicate()[0]
-            # p = subprocess.Popen(args)
-            # p.wait()
-
-            # try to call pydoc again without '-w' argument
-            # python bug: http://stackoverflow.com/a/10333615/1318686
-            if 'no Python documentation found for' in output:
-                output = subprocess.Popen(['pydoc', keyword], stdout=subprocess.PIPE).communicate()[0]
+            # use pandoc to convert reStructuredText to html
+            if settings.get('pandoc'):
+                pandoc_path = settings.get('pandoc_path')
+                # check whether pandoc_path correct
+                # call pydoc
+                output = subprocess.Popen([calls[self.lang][0], keyword], stdout=subprocess.PIPE).communicate()[0]
                 # exit if no help found
                 if 'no Python documentation found for' in output:
-                    return keyword
-                # write html file
-                output = output.replace('\n', '<br>').replace(' ', '&nbsp;')
-                write_html_file(keyword, keyword, output, 'python')
+                        return keyword
+                # create pandoc obj
+                doc = pyandoc(pandoc_path)
+                doc.rst = output
+                # convert to html
+                html = doc.html
+                # create html file
+                write_html_file(keyword, keyword, html, 'python-github')
+                return keyword
+            # use html output from pydoc
+            else:
+                # set working dir
+                os.chdir(self.path)
+                # call pydoc to generate help file in html
+                args = calls[self.lang] + [keyword]
+                # overview topics: help('keywords'), help('modules'), help('topics')
+                output = subprocess.Popen(args, stdout=subprocess.PIPE).communicate()[0]
+                # p = subprocess.Popen(args)
+                # p.wait()
 
-            return keyword
+                # try to call pydoc again without '-w' argument
+                # python bug: http://stackoverflow.com/a/10333615/1318686
+                if 'no Python documentation found for' in output:
+                    output = subprocess.Popen([args[0], keyword], stdout=subprocess.PIPE).communicate()[0]
+                    # exit if no help found
+                    if 'no Python documentation found for' in output:
+                        return keyword
+                    # write html file
+                    output = output.replace('\n', '<br>').replace(' ', '&nbsp;')
+                    write_html_file(keyword, keyword, output, 'python')
+
+                return keyword
 
         # generate rubin help file
         if self.lang == "Ruby":
@@ -533,6 +552,7 @@ class GetHelpFiles(threading.Thread):
                     note_content = note
 
                 # write html file
+                # filename_valid = re.sub(r"[\\/:\"*?<>|]+", "", id)
                 f = open(os.path.join(self.path, id + ".html"), "w")
                 f.write((html_page % (id, id, html, note_content)).encode('utf-8'))
                 f.close()
@@ -584,3 +604,77 @@ class GetHelpFiles(threading.Thread):
 
         sublime.error_message(err)
         self.result = False
+
+## Pyandoc - Python wrapper for Pandoc
+#  https://github.com/kennethreitz/pyandoc
+'''
+LICENSE for Pyandoc
+Copyright (c) 2010 Kenneth Reitz.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+'''
+
+
+class pyandoc(object):
+    """A formatted document."""
+    PANDOC_PATH = '/Users/kreitz/.cabal/bin//pandoc'
+
+    INPUT_FORMATS = (
+        'native', 'markdown', 'markdown+lhs', 'rst',
+        'rst+lhs', 'html', 'latex', 'latex+lhs'
+    )
+
+    OUTPUT_FORMATS = (
+        'native', 'html', 'html+lhs', 's5', 'slidy',
+        'docbook', 'opendocument', 'odt', 'epub',
+        'latex', 'latex+lhs', 'context', 'texinfo',
+        'man', 'markdown', 'markdown+lhs', 'plain',
+        'rst', 'rst+lhs', 'mediawiki', 'rtf'
+    )
+
+    # TODO: Add odt, epub formats (requires file access, not stdout)
+    def __init__(self, pandoc_path):
+        self._content = None
+        self._format = None
+        self._register_formats()
+        self.PANDOC_PATH = pandoc_path
+
+    @classmethod
+    def _register_formats(cls):
+        """Adds format properties."""
+        for fmt in cls.OUTPUT_FORMATS:
+            clean_fmt = fmt.replace('+', '_')
+            setattr(cls, clean_fmt, property(
+                (lambda x, fmt=fmt: cls._output(x, fmt)),
+                (lambda x, y, fmt=fmt: cls._input(x, y, fmt))))
+
+    def _input(self, value, format=None):
+        # format = format.replace('_', '+')
+        self._content = value
+        self._format = format
+
+    def _output(self, format):
+        # print format
+        p = subprocess.Popen(
+            [self.PANDOC_PATH, '--from=%s' % self._format, '--to=%s' % format],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE
+        )
+
+        return p.communicate(self._content)[0]

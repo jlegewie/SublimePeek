@@ -23,6 +23,8 @@
 		["python", r"c:\Python32\Lib\pydoc.py", "-w"]
 	*/
 	"pydoc_call":["pydoc", "-w"],
+	"pandoc":false,
+	"pandoc_path":"pandoc",
 
 	/* 
 	Ruby Help: Define arguments for ri call (default: ['ri', '--format', 'html', '--system', '--gems'])

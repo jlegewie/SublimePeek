@@ -66,8 +66,6 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         # generate help file using python (language specific)
         if self.py_help:
             keyword = self.create_help_file(keyword)
-            if keyword == False:
-                return
 
         # check mapping file to get correct keyword
         map = None
@@ -179,7 +177,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
 
         # if no file found, show overview
         else:
-            if settings.get("overview"):
+            if settings.get("overview") and not self.py_help:
                 keyword = self.get_list_of_help_topics(map)
                 self.select_help_file(keyword, [])
             else:

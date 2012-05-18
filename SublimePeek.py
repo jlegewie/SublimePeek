@@ -64,24 +64,22 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         if keyword == ""  and self.accessor == "python" and not settings.get("overview"):
             return
 
-        # use mapping to get correct keyword
-        if self.accessor == "mapping":
-            # load mapping file
-            map = json.load(open(os.path.join(self.path, '%s-mapping.json' % (self.lang)), "r"))
-            map_from = [item['from'] for item in map]
+        # check mapping file to get correct keyword
+        map = None
+        if self.accessor != "python":
+            # define path to mapping file
+            map_path = os.path.join(self.path, '%s-mapping.json' % (self.lang))
+            # check whether mapping file exists
+            if os.path.isfile(map_path):
+                # load mapping file
+                map = json.load(open(map_path, "r"))
+                map_from = [item['from'] for item in map]
 
-            # get keyword from map
-            if keyword in map_from:
-                # use map to get keyword
-                i = map_from.index(keyword)
-                keyword = map[i]['to']
-            # if keyword not in map, check wether file can be access directly and otherwise compile list for overview
-            else:
-                if not os.path.isfile(os.path.join(self.path, "%s.html" % (keyword))):
-                    if settings.get("overview"):
-                        keyword = self.get_list_of_help_topics(map)
-                    else:
-                        return
+                # get keyword from map
+                if keyword in map_from:
+                    # use map to get keyword
+                    i = map_from.index(keyword)
+                    keyword = map[i]['to']
 
         # generate help file using python (language specific)
         if self.accessor == "python":
@@ -91,7 +89,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
 
         # show help file
         if isinstance(keyword, (str, unicode)):
-            self.show_help(keyword)
+            self.show_help(keyword, map)
         if isinstance(keyword, list):
             if len(keyword) == 1:
                 self.show_help(keyword[0])
@@ -123,7 +121,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         return thread
 
     # call quick look to show help file
-    def show_help(self, keyword):
+    def show_help(self, keyword, map=None):
         """
         display help file using quicklook (qlmanage) on mac ox, gloobus on linux, and os.startfile (or maComfort) on Windows
         """
@@ -182,8 +180,8 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
 
         # if no file found, show overview
         else:
-            if settings.get("overview") and self.accessor == "identity":
-                keyword = self.get_list_of_help_topics()
+            if settings.get("overview"):
+                keyword = self.get_list_of_help_topics(map)
                 self.select_help_file(keyword, [])
             else:
                 sublime.status_message("SublimePeek: No help file found for '" + keyword + "'.")
@@ -355,10 +353,10 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         # show quick panel for selection of help file
         self.view.window().show_quick_panel(items, on_done)
 
-    def get_list_of_help_topics(self, map=""):
+    def get_list_of_help_topics(self, map=None):
         keyword = []
         # get keywords from mapping file
-        if map != "":
+        if not map == None:
             map_to = [item['to'] for item in map]
             for obj in map_to:
                 keyword.append(obj[0])

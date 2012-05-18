@@ -26,47 +26,46 @@ settings = sublime.load_settings(u'SublimePeek.sublime-settings')
 
 
 class SublimePeekCommand(sublime_plugin.TextCommand):
-    # supported languages and accessors
+    # supported languages
     languages = ("Python", "Ruby", "CSS", "HTML", "JavaScript", "PHP", "R", "Stata")
-    accessors = ("python", "python", "identity", "identity", "mapping", "identity", "identity", "mapping")
+    # languages for which help files are created in python on the fly
+    languages_py_help = ("Python", "Ruby")
+
     # class variables
     lang = ""
-    accessor = ""
     path = ""
     filepath = ""
+    py_help = None
 
     def run(self, edit):
 
         # get language
         self.lang = self.get_language()
+        self.py_help = self.lang in self.languages_py_help
 
         # check whether language is supported
         if not self.lang in self.languages:
             return
-        # get accessor from settings
-        self.accessor = self.accessors[self.languages.index(self.lang)]
 
         # path for help files
         self.path = os.path.join(sublime.packages_path(), "SublimePeek-%s-help" % (self.lang))
-        # check whether help files exists unless generated on the fly ("accessor" == "python")
-        if not self.accessor == "python":
+        # check whether help files exists
+        if not self.py_help:
             if not os.path.exists(self.path):
                 # compile help files or exit if compiling fails
                 self.get_help_files()
                 return
-                #if not self.get_help_files(self.lang, self.path):
-                #    return
 
         # get keyword from selection
         keyword = self.get_keyword()
 
         # exit if no keyword defined and setting:overview is false
-        if keyword == ""  and (self.accessor == "python" or not settings.get("overview")):
+        if keyword == ""  and (self.py_help or not settings.get("overview")):
             return
 
         # check mapping file to get correct keyword
         map = None
-        if self.accessor != "python":
+        if not self.py_help:
             # define path to mapping file
             map_path = os.path.join(self.path, '%s-mapping.json' % (self.lang))
             # check whether mapping file exists
@@ -82,7 +81,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
                     keyword = map[i]['to']
 
         # generate help file using python (language specific)
-        if self.accessor == "python":
+        if self.py_help:
             keyword = self.create_help_file(keyword)
             if keyword == False:
                 return
@@ -97,8 +96,8 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
                 self.select_help_file(keyword, [])
 
     def postPeek(self):
-        # remove help file if generated on the fly (self.accessor == "python")
-        if self.accessor == "python":
+        # remove help file if generated on the fly
+        if self.py_help:
             if os.path.isfile(self.filepath):
                 os.remove(self.filepath)
 
@@ -188,7 +187,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
 
     def create_help_file(self, keyword):
         """
-        create help file in python, called when accessor == "python"
+        create help file in python, called when self.py_help==True
         @keyword: the keyword for which to create help
         """
         # set path for help file

@@ -61,7 +61,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         keyword = self.get_keyword()
 
         # exit if no keyword defined and setting:overview is false
-        if keyword == ""  and self.accessor == "python" and not settings.get("overview"):
+        if keyword == ""  and (self.accessor == "python" or not settings.get("overview")):
             return
 
         # check mapping file to get correct keyword

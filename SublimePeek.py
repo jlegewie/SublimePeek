@@ -233,7 +233,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
                 output = subprocess.Popen([calls[self.lang][0], keyword], stdout=subprocess.PIPE).communicate()[0]
                 # exit if no help found
                 if 'no Python documentation found for' in output:
-                        return keyword
+                    return keyword
                 # create pandoc obj
                 doc = pyandoc(pandoc_path)
                 doc.rst = output

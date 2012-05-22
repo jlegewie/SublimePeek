@@ -503,7 +503,7 @@ class GetHelpFiles(threading.Thread):
             # create mapping file for Python
             if self.lang == "Python":
                 mapping_element = '\n{"from": "%s","to": "%s"}'
-                f_map = open(self.path + "Python-mapping.json", "w")
+                f_map = open(os.path.join(self.path, "Python-mapping.json", "w"))
                 f_map.write("[")
 
             # define elements of mapping file as list

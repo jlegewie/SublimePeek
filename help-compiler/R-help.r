@@ -4,6 +4,8 @@
 # Help files for the base packages and ggplot2 are also available at 
 # https://github.com/jlegewie/SublimePeek-R-help
 
+# argsTip, callTip
+
 ## USER PARAMETERS ##
 # set the loc variable to the ST2 Packages Folder (don't forget the / at the end)
 loc      = '~/Library/Application Support/Sublime Text 2/Packages/'

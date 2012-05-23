@@ -503,7 +503,7 @@ class GetHelpFiles(threading.Thread):
             # create mapping file for Python
             if self.lang == "Python":
                 mapping_element = '\n{"from": "%s","to": "%s"}'
-                f_map = open(os.path.join(self.path, "Python-mapping.json", "w"))
+                f_map = open(os.path.join(self.path, "Python-mapping.json"), "w")
                 f_map.write("[")
 
             # define elements of mapping file as list
@@ -564,7 +564,7 @@ class GetHelpFiles(threading.Thread):
                 # structure of mapping.json file
                 mapping_element = '\n  {\n      "from": "%s",\n      "to": %s\n  }'
                 # open file for writing
-                f_map = open(self.path + "JavaScript-mapping.json", "w")
+                f_map = open(os.path.join(self.path + "JavaScript-mapping.json"), "w")
                 f_map.write("[")
                 f_begin = True
                 # iterate through elements in list

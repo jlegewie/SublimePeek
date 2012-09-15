@@ -426,7 +426,7 @@ class SublimePeekGetHelpFilesCommand(sublime_plugin.TextCommand):
         # (sublime.ok_cancel_dialog was added in nightly 2187)
         if sublime.version() >= 2187:
             if not sublime.ok_cancel_dialog("SublimePeek\nDo you want to download and compile the help files for '%s'?" % (self.lang)):
-                sublime.status_message("SublimePeek: Help files for '%s' are not installed." % (self.lang))
+                sublime.status_message("SublimePeek: Help files for '%s' were not installed." % (self.lang))
                 return
         # path for help files
         self.path = os.path.join(sublime.packages_path(), "SublimePeek-%s-help" % (self.lang))

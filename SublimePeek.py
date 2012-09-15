@@ -60,7 +60,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         keyword = self.get_keyword()
 
         # exit if no keyword defined and setting:overview is false
-        if keyword == ""  and (self.py_help or not settings.get("overview")):
+        if keyword == "" and (self.py_help or not settings.get("overview")):
             return
 
         # generate help file using python (language specific)

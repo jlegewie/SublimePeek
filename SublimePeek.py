@@ -430,6 +430,10 @@ class SublimePeekGetHelpFilesCommand(sublime_plugin.TextCommand):
                 return
         # path for help files
         self.path = os.path.join(sublime.packages_path(), "SublimePeek-%s-help" % (self.lang))
+        # corrections to path
+        if self.lang == 'jQuery':
+            self.path = os.path.join(sublime.packages_path(), "SublimePeek-JavaScript-help")
+
         # start download thread
         threads = []
         thread = GetHelpFiles(self.lang, self.path, 5)
@@ -481,8 +485,8 @@ class GetHelpFiles(threading.Thread):
     def run(self):
         try:
             # data files
-            i = ['CSS', 'HTML', 'Python', 'JavaScript', 'PHP'].index(self.lang)
-            d = ['css-mdn.json', 'html-mdn.json', 'python.json', 'js-mdn.json', 'php-ext.json'][i]
+            i = ['CSS', 'HTML', 'Python', 'JavaScript', 'PHP', 'jQuery'].index(self.lang)
+            d = ['css-mdn.json', 'html-mdn.json', 'python.json', 'js-mdn.json', 'php-ext.json', 'jquery.json'][i]
             url = 'https://raw.github.com/rgarcia/dochub/master/static/data/'
 
             # get data from json file at www.github.com/rgarcia/dochub
@@ -494,18 +498,20 @@ class GetHelpFiles(threading.Thread):
                 '<p class="source-link">This content was sourced by <a href="http://dochub.io/">DocHub</a> from MDN at <a target="_blank" href="https://developer.mozilla.org/en/HTML/Element/%s">https://developer.mozilla.org/en/CSS/%s</a>.</p>',
                 '<p class="source-link">This content was sourced by <a href="http://dochub.io/">DocHub</a>.</p>',
                 '<p class="source-link">This content was sourced by <a href="http://dochub.io/">DocHub</a> from MDN.</p>',
-                '<p class="source-link">This content was sourced by <a href="http://dochub.io/">DocHub</a> from MDN.</p>'][i]
+                '<p class="source-link">This content was sourced by <a href="http://dochub.io/">DocHub</a> from MDN.</p>',
+                '<p class="source-link">This content was sourced by <a href="http://dochub.io/">DocHub</a>.</p>'][i]
 
             html_page = '<!DOCTYPE html><html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="chrome=1"><title>SublimePeek | Help for %s</title><link href="css/bootstrap.min.css" rel="stylesheet"><style type="text/css">  body {  padding-top: 10px;  padding-bottom: 20px;  padding-left: 10%;  padding-right: 10%;  }  .sidebar-nav {  padding: 9px 0;  }</style><link href="css/bootstrap-responsive.min.css" rel="stylesheet"><link href="css/custom.css" rel="stylesheet">  </head><body><div style="display: block; "><div id="4eea835f8cd2963cba000002" class="page-header"><h2>%s</h2><!--CONTENT-->%s<!--NOTE-->%s</div></div></body></html>'
             html_page = html_page.replace("10%", "10%%")
 
-            # create folder if is doesn't exists
+            # create folder if it doesn't exists
             if not os.path.exists(self.path):
                 os.makedirs(self.path)
 
             # copy style files
             location = os.path.join(sublime.packages_path(), "SublimePeek", "css", "DocHub")
-            shutil.copytree(location, os.path.join(self.path, 'css'))
+            if not os.path.exists(location):
+                shutil.copytree(location, os.path.join(self.path, 'css'))
             # distutils.dir_util.copy_tree
 
             # get list of keywords
@@ -518,7 +524,7 @@ class GetHelpFiles(threading.Thread):
                 f_map.write("[")
 
             # define elements of mapping file as list
-            if self.lang == "JavaScript":
+            if self.lang == "JavaScript" or self.lang == "jQuery":
                 map_from = []
                 map_to = []
 
@@ -540,7 +546,7 @@ class GetHelpFiles(threading.Thread):
                 html = html.replace("\n", "")
 
                 # mapping file for javascript
-                if self.lang == "JavaScript":
+                if self.lang == "JavaScript" or self.lang == "jQuery":
                     # split at . to get method name such as Array.length
                     fn = id.split(".")[-1]
                     # append to list for to, if function already exists
@@ -572,11 +578,32 @@ class GetHelpFiles(threading.Thread):
                 # add if manually
                 map_from.append("if")
                 map_to.append(["if...else"])
+                # open file for writing
+                f_map = open(os.path.join(self.path, "JavaScript-mapping.json"), "w")
+                f_map.write("[")
+
+            if self.lang == "jQuery":
+                # path to mapping file
+                filename = os.path.join(self.path, "JavaScript-mapping.json")
+                # check whether mapping file exists
+                if not os.path.exists(filename):
+                    # sublime.status_message("SublimePeek: Please install JavaScript help files before jQuery.")
+                    self.result = False
+                    return
+
+                # read mapping file and adjust end
+                file = open(filename, 'r').read().split('\n')
+                del file[-1]
+                file[-1] = '  },'
+                # rewrite mapping file
+                open(filename, "w").write('\n'.join(file))
+                # open file for writing
+                f_map = open(filename, "a")
+
+            if self.lang == "JavaScript" or self.lang == "jQuery":
                 # structure of mapping.json file
                 mapping_element = '\n  {\n      "from": "%s",\n      "to": %s\n  }'
-                # open file for writing
-                f_map = open(os.path.join(self.path + "JavaScript-mapping.json"), "w")
-                f_map.write("[")
+
                 f_begin = True
                 # iterate through elements in list
                 for fn in map_from:

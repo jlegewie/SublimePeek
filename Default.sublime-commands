@@ -22,5 +22,10 @@
         "caption": "SublimePeek: Get Help Files for JavaScript",
         "command": "sublime_peek_get_help_files",
         "args": {"lang": "JavaScript"}
+    },
+    {
+        "caption": "SublimePeek: Get Help Files for jQuery",
+        "command": "sublime_peek_get_help_files",
+        "args": {"lang": "jQuery"}
     }
 ]

@@ -1,7 +1,7 @@
 # SublimePeek
-SublimePeek provides quick access to documentation by opening help files in Quick Look. The plugin supports _HTML_, _CSS_, _JavaScript_, _PHP_, _Python_, _Ruby_, _R_, and _Stata_. Support for other languages can be added easily.
+SublimePeek provides quick access to documentation by opening help files in Quick Look. The plugin supports _HTML_, _CSS_, _JavaScript_, _jQuery_, _PHP_, _Python_, _Ruby_, _R_, and _Stata_. Support for other languages can be added easily.
 
-**Supported Languages:** HTML, CSS, JavaScript, PHP, Python, Ruby, R, and Stata
+**Supported Languages:** HTML, CSS, JavaScript, jQuery, PHP, Python, Ruby, R, and Stata
 
 ## Installation
 (instructions based on https://github.com/Kronuz/SublimeLinter and ZoteroQuickLook)
@@ -48,6 +48,9 @@ The python help files are generated on the fly using `pydoc` for Python and `ri`
 
 ### HTML, CSS, JavaScript, and PHP
 The help files for HTML, CSS, JavaScript, and PHP are based on [DocHub](http://dochub.io/). They first need to be downloaded and compiled. SublimePeek can do all the work for you. So just open a corresponding file and start using SublimePeek. The first time you will be asked whether you want to download and compile the files, which takes a moment.
+
+### jQuery
+The jQuery files extend the JavaScript help files. To install the additional help files, first install the JavaScript files (otherwise jQuery will fail silently) and then select `SublimePeek: Get Help Files for jQuery` from the ST2 command palette.
 
 ### R and Stata
 For R, you have to install the help files yourself. They are available as an additional package from Package Control (`SublimePeek-R-help`) or on a separate GitHub repos at https://github.com/jlegewie/SublimePeek-R-help.

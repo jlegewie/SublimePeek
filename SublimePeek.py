@@ -510,7 +510,7 @@ class GetHelpFiles(threading.Thread):
 
             # copy style files
             location = os.path.join(sublime.packages_path(), "SublimePeek", "css", "DocHub")
-            if not os.path.exists(location):
+            if not os.path.exists(os.path.join(self.path, 'css')):
                 shutil.copytree(location, os.path.join(self.path, 'css'))
             # distutils.dir_util.copy_tree
 

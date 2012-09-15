@@ -53,7 +53,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         if not self.py_help:
             if not os.path.exists(self.path):
                 # compile help files or exit if compiling fails
-                self.get_help_files()
+                self.view.run_command('sublime_peek_get_help_files',{"lang":self.lang})
                 return
 
         # get keyword from selection
@@ -409,16 +409,27 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
 
         return pt
 
-    # download and compile help files from DocHub
-    # the threading code was adopted from
-    # http://net.tutsplus.com/tutorials/python-tutorials/how-to-create-a-sublime-text-2-plugin/
-    def get_help_files(self):
+
+class SublimePeekGetHelpFilesCommand(sublime_plugin.TextCommand):
+    """
+    download and compile help files from DocHub
+    the threading code was adopted from
+    http://net.tutsplus.com/tutorials/python-tutorials/how-to-create-a-sublime-text-2-plugin/
+    """
+
+    path = ""
+    lang = ""
+
+    def run(self, edit, lang):
+        self.lang = lang
         # prompt user (only for version >= 2187)
         # (sublime.ok_cancel_dialog was added in nightly 2187)
         if sublime.version() >= 2187:
             if not sublime.ok_cancel_dialog("SublimePeek\nDo you want to download and compile the help files for '%s'?" % (self.lang)):
                 sublime.status_message("SublimePeek: Help files for '%s' are not installed." % (self.lang))
                 return
+        # path for help files
+        self.path = os.path.join(sublime.packages_path(), "SublimePeek-%s-help" % (self.lang))
         # start download thread
         threads = []
         thread = GetHelpFiles(self.lang, self.path, 5)

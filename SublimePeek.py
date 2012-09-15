@@ -543,7 +543,7 @@ class GetHelpFiles(threading.Thread):
                             f_map.write(',')
                 else:
                     html = "".join(data[i]['sectionHTMLs'])
-                html = html.replace("\n", "")
+                # html = html.replace("\n", "")
 
                 # mapping file for javascript
                 if self.lang == "JavaScript" or self.lang == "jQuery":

@@ -2,5 +2,25 @@
     {
         "caption": "SublimePeek: Get Help for Function",
         "command": "sublime_peek"
+    },
+    {
+        "caption": "SublimePeek: Get Help Files for PHP",
+        "command": "sublime_peek_get_help_files",
+        "args": {"lang": "PHP"}
+    },
+    {
+        "caption": "SublimePeek: Get Help Files for HTML",
+        "command": "sublime_peek_get_help_files",
+        "args": {"lang": "HTML"}
+    },
+    {
+        "caption": "SublimePeek: Get Help Files for CSS",
+        "command": "sublime_peek_get_help_files",
+        "args": {"lang": "CSS"}
+    },
+    {
+        "caption": "SublimePeek: Get Help Files for JavaScript",
+        "command": "sublime_peek_get_help_files",
+        "args": {"lang": "JavaScript"}
     }
 ]

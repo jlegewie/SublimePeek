@@ -23,7 +23,7 @@ settings = sublime.load_settings(u'SublimePeek.sublime-settings')
 
 class SublimePeekCommand(sublime_plugin.TextCommand):
     # supported languages and accessors
-    languages = ("Python", "Ruby", "CSS", "HTML", "JavaScript", "PHP", "R", "Stata")
+    languages = ("Python", "Ruby", "Ruby on Rails", "RSpec", "CSS", "HTML", "JavaScript", "PHP", "R", "Stata")
     accessors = ("python", "python", "identity", "identity", "mapping", "identity", "identity", "mapping")
     # class variables
     lang = ""
@@ -230,7 +230,10 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         lang = lang[len(lang) - 1].split('.')[0]
         # support common CSS preprocessors
         if lang in ["LESS", "SASS", "SCSS"]:
-            lang = "CSS"        
+            lang = "CSS"
+        # support common Ruby syntax
+        if lang in ["Ruby", "Ruby on Rails", "RSpec"]:
+            lang = "Ruby"
         # get scope for embedded PHP, JS, or CSS
         if lang == "HTML":
             scope = self.view.syntax_name(self.view.sel()[0].b)

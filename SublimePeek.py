@@ -24,7 +24,7 @@ settings = sublime.load_settings(u'SublimePeek.sublime-settings')
 class SublimePeekCommand(sublime_plugin.TextCommand):
     # supported languages and accessors
     languages = ("Python", "Ruby", "Ruby on Rails", "RSpec", "CSS", "HTML", "JavaScript", "PHP", "R", "Stata")
-    accessors = ("python", "python", "identity", "identity", "mapping", "identity", "identity", "mapping")
+    accessors = ("python", "python", "python", "python", "identity", "identity", "mapping", "identity", "identity", "mapping")
     # class variables
     lang = ""
     accessor = ""

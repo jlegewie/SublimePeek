@@ -8,7 +8,7 @@ import threading
 import re
 import os
 import json
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import shutil
 
 ## mac os - quicklook
@@ -22,7 +22,7 @@ import shutil
 # C:\Program Files\maComfort\maComfort.exe -ql [FILEPATH]
 
 ## load settings
-settings = sublime.load_settings(u'SublimePeek.sublime-settings')
+settings = sublime.load_settings('SublimePeek.sublime-settings')
 
 
 class SublimePeekCommand(sublime_plugin.TextCommand):
@@ -85,7 +85,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
                     keyword = map[i]['to']
 
         # show help file
-        if isinstance(keyword, (str, unicode)):
+        if isinstance(keyword, str):
             self.show_help(keyword, map)
         if isinstance(keyword, list):
             if len(keyword) == 1:
@@ -204,7 +204,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
                     keyword = keywords[index]
                     # get selected help file
                     args = calls[self.lang] + [keyword]
-                    output = subprocess.Popen(args, stdout=subprocess.PIPE).communicate()[0]
+                    output = subprocess.Popen(args, stdout=subprocess.PIPE).communicate()[0].decode("utf-8")
                     # save selected help files
                     if self.lang == 'Ruby':
                         write_html_file('ruby', keyword, output, 'ruby')
@@ -228,7 +228,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
                 pandoc_path = settings.get('pandoc_path')
                 # check whether pandoc_path correct
                 # call pydoc
-                output = subprocess.Popen([calls[self.lang][0], keyword], stdout=subprocess.PIPE).communicate()[0]
+                output = subprocess.Popen([calls[self.lang][0], keyword], stdout=subprocess.PIPE).communicate()[0].decode("utf-8")
                 # exit if no help found
                 if 'no Python documentation found for' in output:
                     return keyword
@@ -247,14 +247,14 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
                 # call pydoc to generate help file in html
                 args = calls[self.lang] + [keyword]
                 # overview topics: help('keywords'), help('modules'), help('topics')
-                output = subprocess.Popen(args, stdout=subprocess.PIPE).communicate()[0]
+                output = subprocess.Popen(args, stdout=subprocess.PIPE).communicate()[0].decode("utf-8")
                 # p = subprocess.Popen(args)
                 # p.wait()
 
                 # try to call pydoc again without '-w' argument
-                # python bug: http://stackoverflow.com/a/10333615/1318686
+                # python bug: http://stackoverflow.com/a/10333615/1318686                
                 if 'no Python documentation found for' in output:
-                    output = subprocess.Popen([args[0], keyword], stdout=subprocess.PIPE).communicate()[0]
+                    output = subprocess.Popen([args[0], keyword], stdout=subprocess.PIPE).communicate()[0].decode("utf-8")
                     # exit if no help found
                     if 'no Python documentation found for' in output:
                         return keyword
@@ -268,7 +268,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         if self.lang == "Ruby":
             # get help for keyword
             args = calls[self.lang] + [keyword]
-            output = subprocess.Popen(args, stdout=subprocess.PIPE).communicate()[0]
+            output = subprocess.Popen(args, stdout=subprocess.PIPE).communicate()[0].decode("utf-8")
             # exit if no help found
             if output == '':
                 return keyword
@@ -298,7 +298,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         lang, _ = os.path.splitext(fname)
         # get scope for embedded PHP, JS, or CSS
         if lang == "HTML":
-            scope = self.view.syntax_name(self.view.sel()[0].b)
+            scope = self.view.scope_name(self.view.sel()[0].b)            
             if "source.php.embedded.block.html" in scope:
                 lang = "PHP"
             if "source.js.embedded.html" in scope:
@@ -424,7 +424,7 @@ class SublimePeekGetHelpFilesCommand(sublime_plugin.TextCommand):
         self.lang = lang
         # prompt user (only for version >= 2187)
         # (sublime.ok_cancel_dialog was added in nightly 2187)
-        if sublime.version() >= 2187:
+        if int(sublime.version()) >= 2187:
             if not sublime.ok_cancel_dialog("SublimePeek\nDo you want to download and compile the help files for '%s'?" % (self.lang)):
                 sublime.status_message("SublimePeek: Help files for '%s' were not installed." % (self.lang))
                 return
@@ -490,7 +490,9 @@ class GetHelpFiles(threading.Thread):
             url = 'https://raw.github.com/rgarcia/dochub/master/static/data/'
 
             # get data from json file at www.github.com/rgarcia/dochub
-            data = json.load(urllib2.urlopen(url + d, timeout=self.timeout))
+            response = urllib.request.urlopen(url + d, timeout=self.timeout)
+            str_response = response.readall().decode('utf-8')            
+            data = json.loads(str_response)
 
             # html elements
             note = [
@@ -565,7 +567,7 @@ class GetHelpFiles(threading.Thread):
 
                 # write html file
                 # filename_valid = re.sub(r"[\\/:\"*?<>|]+", "", id)
-                f = open(os.path.join(self.path, id + ".html"), "w")
+                f = open(os.path.join(self.path, id + ".html"), "wb")
                 f.write((html_page % (id, id, html, note_content)).encode('utf-8'))
                 f.close()
 
@@ -630,9 +632,11 @@ class GetHelpFiles(threading.Thread):
             self.result = True
             return
 
-        except (urllib2.HTTPError) as (e):
+        except (urllib.error.HTTPError) as xxx_todo_changeme:
+            (e) = xxx_todo_changeme
             err = '%s: HTTP error %s contacting API' % (__name__, str(e.code))
-        except (urllib2.URLError) as (e):
+        except (urllib.error.URLError) as xxx_todo_changeme1:
+            (e) = xxx_todo_changeme1
             err = '%s: URL error %s contacting API' % (__name__, str(e.reason))
 
         sublime.error_message(err)

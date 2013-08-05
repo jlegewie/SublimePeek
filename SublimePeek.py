@@ -252,7 +252,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
                 # p.wait()
 
                 # try to call pydoc again without '-w' argument
-                # python bug: http://stackoverflow.com/a/10333615/1318686                
+                # python bug: http://stackoverflow.com/a/10333615/1318686
                 if 'no Python documentation found for' in output:
                     output = subprocess.Popen([args[0], keyword], stdout=subprocess.PIPE).communicate()[0].decode("utf-8")
                     # exit if no help found
@@ -298,7 +298,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         lang, _ = os.path.splitext(fname)
         # get scope for embedded PHP, JS, or CSS
         if lang == "HTML":
-            scope = self.view.scope_name(self.view.sel()[0].b)            
+            scope = self.view.scope_name(self.view.sel()[0].b)
             if "source.php.embedded.block.html" in scope:
                 lang = "PHP"
             if "source.js.embedded.html" in scope:
@@ -491,7 +491,7 @@ class GetHelpFiles(threading.Thread):
 
             # get data from json file at www.github.com/rgarcia/dochub
             response = urllib.request.urlopen(url + d, timeout=self.timeout)
-            str_response = response.readall().decode('utf-8')            
+            str_response = response.readall().decode('utf-8')
             data = json.loads(str_response)
 
             # html elements

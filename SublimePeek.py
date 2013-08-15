@@ -296,6 +296,9 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         lang_file = self.view.settings().get('syntax')
         _, fname = os.path.split(lang_file)
         lang, _ = os.path.splitext(fname)
+        # support CoffeeScript as JavaScript
+        if lang.lower() == "CoffeeScript".lower():
+            lang = "JavaScript"
         # get scope for embedded PHP, JS, or CSS
         if lang == "HTML":
             scope = self.view.scope_name(self.view.sel()[0].b)

@@ -296,6 +296,9 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         lang_file = self.view.settings().get('syntax')
         _, fname = os.path.split(lang_file)
         lang, _ = os.path.splitext(fname)
+        # support common CSS preprocessors
+        if lang in ["LESS", "SASS", "SCSS"]:
+            lang = "CSS"
         # support CoffeeScript as JavaScript
         if lang.lower() == "CoffeeScript".lower():
             lang = "JavaScript"

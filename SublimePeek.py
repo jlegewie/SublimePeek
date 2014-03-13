@@ -22,8 +22,6 @@ import shutil
 # C:\Program Files\maComfort\maComfort.exe -ql [FILEPATH]
 
 ## load settings
-settings = sublime.load_settings('SublimePeek.sublime-settings')
-
 
 class SublimePeekCommand(sublime_plugin.TextCommand):
     # supported languages
@@ -36,6 +34,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
     path = ""
     filepath = ""
     py_help = None
+    settings = None    
 
     def run(self, edit):
 
@@ -46,6 +45,8 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         # check whether language is supported
         if not self.lang in self.languages:
             return
+
+        self.settings = sublime.load_settings('SublimePeek.sublime-settings')
 
         # path for help files
         self.path = os.path.join(sublime.packages_path(), "SublimePeek-%s-help" % (self.lang))
@@ -60,7 +61,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         keyword = self.get_keyword()
 
         # exit if no keyword defined and setting:overview is false
-        if keyword == "" and (self.py_help or not settings.get("overview")):
+        if keyword == "" and (self.py_help or not self.settings.get("overview")):
             return
 
         # generate help file using python (language specific)
@@ -156,8 +157,8 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
                 # self.filepath = self.filepath.replace('/', '\\')
 
             # use custum executable
-            if settings.get("custom_executable"):
-                executable = settings.get("custom_executable")
+            if self.settings.get("custom_executable"):
+                executable = self.settings.get("custom_executable")
                 error_mess = "'" + executable[0] + "' is missing. Please set 'custom_executable' to a correct executable."
 
             # check whether executable exists
@@ -177,7 +178,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
 
         # if no file found, show overview
         else:
-            if settings.get("overview") and not self.py_help:
+            if self.settings.get("overview") and not self.py_help:
                 keyword = self.get_list_of_help_topics(map)
                 self.select_help_file(keyword, [])
             else:
@@ -193,8 +194,8 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
 
         # define arguments for subprocess call
         calls = {
-            'Python': settings.get("pydoc_call"),
-            'Ruby': settings.get("ri_call")
+            'Python': self.settings.get("pydoc_call"),
+            'Ruby': self.settings.get("ri_call")
         }
 
         # select help file to create
@@ -224,8 +225,8 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         # generate python help file
         if self.lang == "Python":
             # use pandoc to convert reStructuredText to html
-            if settings.get('pandoc'):
-                pandoc_path = settings.get('pandoc_path')
+            if self.settings.get('pandoc'):
+                pandoc_path = self.settings.get('pandoc_path')
                 # check whether pandoc_path correct
                 # call pydoc
                 output = subprocess.Popen([calls[self.lang][0], keyword], stdout=subprocess.PIPE).communicate()[0].decode("utf-8")

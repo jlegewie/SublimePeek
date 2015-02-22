@@ -3,6 +3,8 @@
 
 import sublime
 import sublime_plugin
+import platform
+import webbrowser
 import subprocess
 import threading
 import re
@@ -136,6 +138,10 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
             if sublime.platform() == "osx":
                 executable = ['/usr/bin/qlmanage', '-p']
                 error_mess = "qlmanage is missing. I don't know why... :("
+                # qlmanage is sandboxed in Yosemite...
+                if '10.10' in platform.mac_ver()[0]:
+                    executable = ['webbrowser']
+                    error_mess = "SublimePeek failed....  :("
                 # qlmanage documentation list
                 # http://developer.apple.com/library/mac/#documentation/Darwin/Reference/ManPages/man1/qlmanage.1.html
 
@@ -163,7 +169,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
 
             # check whether executable exists
             if executable:
-                if not os.path.isfile(executable[0]):
+                if not os.path.isfile(executable[0]) and executable != ['webbrowser']:
                     sublime.status_message("SublimePeek: " + error_mess)
                     self.postPeek()
                     return
@@ -172,6 +178,11 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
             if executable:
                 args = executable + [self.filepath]
                 self.popenAndCall(args, self.postPeek)
+                if executable == ['webbrowser']:
+                    webbrowser.open('file://' + self.filepath, new = 2)
+                else:
+                    args = executable + [self.filepath]
+                    self.popenAndCall(args, self.postPeek)
             else:
                 if sublime.platform() == "windows":
                     os.startfile(self.filepath)

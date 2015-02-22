@@ -2,6 +2,11 @@
 	/* show overview of all available help files if no help file found */
 	"overview":true,
 
+	/* Show popup tooltip with info about scope */
+	"show_popup": false,
+	"max_width": 370,
+	"max_height": 260,
+
 	/*
 	Define custom  executable for display of help files
 

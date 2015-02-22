@@ -1,0 +1,29 @@
+body {
+	font-family: "Source Code Pro Light", "Courier New";
+	font-color: #333333;
+}
+h1, h2 {
+	font-family: "Source Code Pro Light", "Courier New";
+	font-weight: Regular;
+	font-color: #000000;
+	font-size: 1.4em;
+}
+h3 {
+	font-family: "Source Code Pro Semibold", "Courier";
+	font-color: #666666;
+	font-size: 1.1em;
+}
+h4 {
+	font-family: "Source Code Pro Medium", "Courier";
+	font-color: #666666;
+	font-size: 1.1em;
+}
+.code {
+	font-family: "Source Code Pro", "Courier";
+	font-color: #000000;
+}
+.pre {
+	font-family: "Source Code Pro", "Courier";
+	display: block;
+	background-color: #F8F8F8;
+} 

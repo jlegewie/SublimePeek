@@ -12,6 +12,8 @@ import os
 import json
 import urllib.request, urllib.error, urllib.parse
 import shutil
+import SublimePeek.bleach
+from SublimePeek.html2text import html2text
 
 ## mac os - quicklook
 # /usr/bin/qlmanage -p [FILEPATH]
@@ -120,6 +122,98 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         # returns immediately after the thread starts
         return thread
 
+    def split_string(self, s, width, sep=' ', prefix=''):
+        chunks = s.split(sep)
+        rows = [chunks[0]]
+        for i in range(1, len(chunks)):
+            chunk = rows[-1] + sep + chunks[i]
+            if len(chunk) < width:
+                rows[-1] = chunk
+            else:
+                rows[-1] = rows[-1] + sep
+                rows.append(prefix + chunks[i])
+        # return [row.strip().replace('  ', ' ') for row in rows]
+        return rows
+
+    def format_pre(self, s, max_chars = 52):
+        s = re.split(r'(</?pre.*?>)', s)
+        indices = [i +1 for i, x in enumerate(s) if x == '<pre>']
+        for i in indices:
+            s[i] = re.sub(' ', '&nbsp;', s[i])
+            s[i] = re.sub('\n', '<br>', s[i])
+        s = ''.join(s)
+        s = re.sub(r'<pre.*?>', '<span class="pre">', s)
+        s = re.sub(r'</pre>', '</span>', s)
+        return s
+
+    def format_table(self, s, max_chars = 52):
+        s = re.split(r'(</?table.*?>)', s)
+        indices = [i +1 for i, x in enumerate(s) if '<table' in x]
+        for i in indices:
+            tab = html2text(s[i])
+            tab = re.split(r'\n*', tab.strip('\n'))
+            l = [len(t) for t in tab if t[-1] == '|']
+            if len(l) == 0:
+                s[i] = ''
+                continue
+            width = max(l)
+            tab = ['<br>' + t.ljust(width).replace('|', '') if t[-1] == '|' else '<br>'.join([' '*(width-3) + p for p in self.split_string(t, chars-width)]).strip() for t in tab if t.strip() != '']
+            # width
+            s[i] = ''.join(tab)
+            s[i] = re.sub(' ', '&nbsp;', s[i])
+            s[i] = re.sub('\n', '<br>', s[i])
+            s[i] = re.sub('`([^`]+)`', '<span class="code">\g<1></span>', s[i])
+            s[i] = re.sub('\*\*([^*]+)\*\*', '<strong>\g<1></strong>', s[i])
+            s[i] = re.sub('\*([^*]+)\*', '<strong>\g<1></strong>', s[i])
+        s = ''.join(s)
+        s = re.sub(r'</?table.*?>', '', s)
+        return s
+
+    def format_ul(self, s, max_chars = 52):
+        s = re.split(r'(</?ul.*?>)', s)
+        indices = [i +1 for i, x in enumerate(s) if '<ul' in x]
+        for i in indices:
+            chunk = html2text(s[i])
+            chunk = re.split(r'\n*', chunk.strip('\n'))
+            chunk = [self.split_string(c, max_chars, prefix = '  ') for c in chunk if c.strip() != '']
+            s[i] = '<br>'.join(['<br>'.join(c).replace('  ', '&nbsp;&nbsp;') for c in chunk])
+        s = ''.join(s)
+        s = re.sub(r'</?ul.*?>', '', s)
+        return s
+
+    def format_tooltip(self, s, max_chars = 52):
+        allowed_tags = ["body","p", "code", "span", "br", "a", "b", "u", "i", "a", "h1", "h2", "h3", "h4", "h5", "h6", "big", "tt", "div", "style", "small", "code", "em", "var", "strong"]
+        allowed_styles = ["display", "background-color", "color", "margin", "font-size", "font-family", "font-weight", "font-style", "text-decoration"]
+        allowed_attributes = ["style", "class"]
+        # format `pre`, `table`, `ul`
+        s = self.format_pre(s, max_chars)
+        s = self.format_table(s, max_chars)
+        s = self.format_ul(s, max_chars)        
+        # remove head, new lines and change some tags
+        s = re.sub(r'\n', '', s)
+        s = re.sub(r'<head.*?>.*</head>', '', s)
+        s = re.sub(r'<code>', '<span class="code">', s)
+        s = re.sub(r'</code>', '</span>', s)
+        s = re.sub(r'</?(html)>', '', s)
+        s = re.sub(r'</?(html).+?>', '', s)
+        # format <font> tag
+        s = re.sub('<font([^>]+)>', '<style\g<1>>', s)
+        s = re.sub('</font>', '</style>', s)
+        s = re.sub('(color|face|size)=', 'font-\g<1>=', s)
+        s = re.sub('font-face=', 'font-family=', s)
+        # clean html
+        s = SublimePeek.bleach.clean(s, attributes = allowed_attributes, tags = allowed_tags, styles = allowed_styles).strip(' ')
+        # clean up...
+        if s[0:29] == '<div style="display: block;">':
+            s = s.replace('<div style="display: block;">', '')[:-6]
+        if s[0:25] == '<div class="page-header">':
+            s = s.replace('<div class="page-header">', '')[:-6]
+        s = s.replace('<div></div>', '')
+        s = s.replace('<div>', '<p>').replace('</div>', '</p>')
+        s = s.replace('<br></p>', '</p>')
+        # return
+        return s
+
     # call quick look to show help file
     def show_help(self, keyword, map=None):
         """
@@ -174,8 +268,22 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
                     self.postPeek()
                     return
 
+            # show tooltip
+            if self.settings.get("show_popup"):
+                print(self.filepath)
+                # get tooltip
+                css = sublime.load_resource("Packages/SublimePeek/css/tooltip.css").replace('\r', '\n')
+                file = open(self.filepath, 'r').read()
+                content = self.format_tooltip(file)
+                # save formated tooltip
+                with open(os.path.join(sublime.packages_path(), "SublimePeek", "tooltip.txt"), 'w') as the_file:
+                    the_file.write(content)
+                # show tooltip
+                self.view.show_popup('<style>%s</style>%s' % (css, content),
+                    max_width = self.settings.get("max_width"),
+                    max_height = self.settings.get("max_height"))
             # call executable to display help file
-            if executable:
+            elif executable:
                 if executable == ['webbrowser']:
                     webbrowser.open('file://' + self.filepath, new = 2)
                 else:

@@ -175,6 +175,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
                     return
 
             # call executable to display help file
+            if executable:
                 if executable == ['webbrowser']:
                     webbrowser.open('file://' + self.filepath, new = 2)
                 else:

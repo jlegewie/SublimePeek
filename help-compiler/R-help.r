@@ -6,7 +6,7 @@
 
 ## USER PARAMETERS ##
 # set the loc variable to the ST2 Packages Folder (don't forget the / at the end)
-loc      = '~/Library/Application Support/Sublime Text 2/Packages/'
+loc      = '~/Library/Application Support/Sublime Text 3/Packages/'
 # the default setting uses all installed packages. Alternative: vector of packages
 pkg.user = rownames(installed.packages())
 

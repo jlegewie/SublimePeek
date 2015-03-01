@@ -136,63 +136,53 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         return rows
 
     def format_pre(self, s, max_chars = 52):
-        s = re.split(r'(</?pre.*?>)', s)
-        indices = [i +1 for i, x in enumerate(s) if x == '<pre>']
+        s = re.compile('(</?pre.*?>)', re.IGNORECASE).split(s)
+        indices = [i +1 for i, x in enumerate(s) if x == '<pre>' or x == '<PRE>']
         for i in indices:
             s[i] = re.sub(' ', '&nbsp;', s[i])
             s[i] = re.sub('\n', '<br>', s[i])
         s = ''.join(s)
-        s = re.sub(r'<pre.*?>', '<span class="pre">', s)
-        s = re.sub(r'</pre>', '</span>', s)
+        s = re.compile('<pre.*?>', re.IGNORECASE).sub('<span class="pre">', s)
+        s = re.compile('</pre>', re.IGNORECASE).sub('</span>', s)
         return s
 
     def format_table(self, s, max_chars = 52):
-        s = re.split(r'(</?table.*?>)', s)
-        indices = [i +1 for i, x in enumerate(s) if '<table' in x]
-        for i in indices:
-            tab = html2text(s[i])
-            tab = re.split(r'\n*', tab.strip('\n'))
-            l = [len(t) for t in tab if t[-1] == '|']
-            if len(l) == 0:
-                s[i] = ''
-                continue
-            width = max(l)
-            tab = ['<br>' + t.ljust(width).replace('|', '') if t[-1] == '|' else '<br>'.join([' '*(width-3) + p for p in self.split_string(t, chars-width)]).strip() for t in tab if t.strip() != '']
-            # width
-            s[i] = ''.join(tab)
-            s[i] = re.sub(' ', '&nbsp;', s[i])
-            s[i] = re.sub('\n', '<br>', s[i])
-            s[i] = re.sub('`([^`]+)`', '<span class="code">\g<1></span>', s[i])
-            s[i] = re.sub('\*\*([^*]+)\*\*', '<strong>\g<1></strong>', s[i])
-            s[i] = re.sub('\*([^*]+)\*', '<strong>\g<1></strong>', s[i])
-        s = ''.join(s)
-        s = re.sub(r'</?table.*?>', '', s)
+        s = re.sub(r'<table(.*?)>', '<ul>', s)
+        s = re.sub(r'</table>', '</ul>', s)
+        s = re.sub(r'<tr(.*?)>', '<li>', s)
+        s = re.sub(r'</tr>', '</li>', s)
+        s = re.sub(r'<td(.*?)>', '<em>', s, count = 1)
+        s = re.sub(r'</td>', '</em>', s, count = 1)
+        s = re.sub(r'<td(.*?)>', '', s)
+        s = re.sub(r'</td>', '', s)
         return s
 
-    def format_ul(self, s, max_chars = 52):
-        s = re.split(r'(</?ul.*?>)', s)
-        indices = [i +1 for i, x in enumerate(s) if '<ul' in x]
-        for i in indices:
-            chunk = html2text(s[i])
-            chunk = re.split(r'\n*', chunk.strip('\n'))
-            chunk = [self.split_string(c, max_chars, prefix = '  ') for c in chunk if c.strip() != '']
-            s[i] = '<br>'.join(['<br>'.join(c).replace('  ', '&nbsp;&nbsp;') for c in chunk])
-        s = ''.join(s)
-        s = re.sub(r'</?ul.*?>', '', s)
+    def format_dl(self, s):
+        s = re.sub(r'<dl(.*?)>', '<ul>', s)
+        s = re.sub(r'</dl>', '</ul>', s)
+        s = re.sub(r'<dt(.*?)>', '<li>', s)
+        s = re.sub(r'</dt>', '</li>', s)
+        s = re.sub(r'<dd(.*?)>', '<em>', s, count = 1)
+        s = re.sub(r'</dd>', '</em>', s, count = 1)
+        s = re.sub(r'<dd(.*?)>', '', s)
+        s = re.sub(r'</dd>', '', s)
         return s
 
     def format_tooltip(self, s, max_chars = 52):
-        allowed_tags = ["body","p", "code", "span", "br", "a", "b", "u", "i", "a", "h1", "h2", "h3", "h4", "h5", "h6", "big", "tt", "div", "style", "small", "code", "em", "var", "strong"]
+        allowed_tags = ["body","p", "ul", "li", "img", "code", "span", "br", "a", "b", "u", "i", "a", "h1", "h2", "h3", "h4", "h5", "h6", "big", "tt", "div", "style", "small", "code", "em", "var", "strong"]
         allowed_styles = ["display", "background-color", "color", "margin", "font-size", "font-family", "font-weight", "font-style", "text-decoration"]
-        allowed_attributes = ["style", "class"]
+        allowed_attributes = ["style", "class", "href"]
         # format `pre`, `table`, `ul`
         s = self.format_pre(s, max_chars)
         s = self.format_table(s, max_chars)
-        s = self.format_ul(s, max_chars)        
+        s = self.format_dl(s)
         # remove head, new lines and change some tags
         s = re.sub(r'\n', '', s)
         s = re.sub(r'<head.*?>.*</head>', '', s)
         s = re.sub(r'<code>', '<span class="code">', s)
+        s = re.sub(r'<ol(.*?)>', '<ul\g<1>>', s)
+        s = re.sub(r'</ol>', '</ul>', s)
+        s = re.sub(r'<li> *<p>(.*?)</p>', '<li>\g<1>', s)
         s = re.sub(r'</code>', '</span>', s)
         s = re.sub(r'</?(html)>', '', s)
         s = re.sub(r'</?(html).+?>', '', s)
@@ -211,6 +201,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
         s = s.replace('<div></div>', '')
         s = s.replace('<div>', '<p>').replace('</div>', '</p>')
         s = s.replace('<br></p>', '</p>')
+        print(s[0:100])
         # return
         return s
 
@@ -276,10 +267,11 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
                 file = open(self.filepath, 'r').read()
                 content = self.format_tooltip(file)
                 # save formated tooltip
-                with open(os.path.join(sublime.packages_path(), "SublimePeek", "tooltip.txt"), 'w') as the_file:
+                with open(os.path.join(sublime.packages_path(), "SublimePeek", "tooltip.html"), 'w') as the_file:
                     the_file.write(content)
                 # show tooltip
                 self.view.show_popup('<style>%s</style>%s' % (css, content),
+                    on_navigate = self.open_link,
                     max_width = self.settings.get("max_width"),
                     max_height = self.settings.get("max_height"))
             # call executable to display help file
@@ -300,6 +292,9 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
                 self.select_help_file(keyword, [])
             else:
                 sublime.status_message("SublimePeek: No help file found for '" + keyword + "'.")
+
+    def open_link(self, href):
+        webbrowser.open(href, new = 2)
 
     def create_help_file(self, keyword):
         """

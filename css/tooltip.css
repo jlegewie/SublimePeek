@@ -1,31 +1,27 @@
 body {
-	font-family: "Source Code Pro Light";
-	font-color: #333333;
+	color: #444444;
 }
 h1, h2 {
-	font-family: "Source Code Pro Light";
 	font-weight: Regular;
-	font-color: #FF0000;
+	color: #444444;
 	font-size: 1.4em;
 }
 h3 {
-	font-family: "Source Code Pro Semibold";
-	font-color: #666666;
-	font-size: 1.1em;
+	font-weight: Regular;
+	color: #444444;
+	font-size: 1.2em;
 }
 h4 {
-	font-family: "Source Code Pro Medium";
-	font-color: #666666;
-	font-size: 1.1em;
+	font-weight: Regular;
+	color: #444444;
+	font-size: 1.2em;
 }
 .code {
-	font-family: "Source Code Pro";
-	background-color: #F6F6F6;
-	font-color: #000000;
+	background-color: #F0F0F0;
+	color: #000000;
 }
 .pre {
-	font-family: "Source Code Pro";
 	display: block;
 	background-color: #F6F6F6;
-	font-color: #000000;
-} 
+	color: #000000;
+}

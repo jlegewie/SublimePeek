@@ -263,7 +263,7 @@ class SublimePeekCommand(sublime_plugin.TextCommand):
             if self.settings.get("show_popup"):
                 print(self.filepath)
                 # get tooltip
-                css = sublime.load_resource("Packages/SublimePeek/css/tooltip.css").replace('\r', '\n')
+                css = sublime.load_resource(self.settings.get("style")).replace('\r', '\n')
                 file = open(self.filepath, 'r').read()
                 content = self.format_tooltip(file)
                 # save formated tooltip

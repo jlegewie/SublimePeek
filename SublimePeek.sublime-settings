@@ -6,6 +6,7 @@
 	"show_popup": false,
 	"max_width": 370,
 	"max_height": 260,
+	"style": "Packages/SublimePeek/css/tooltip.css",
 
 	/*
 	Define custom  executable for display of help files
